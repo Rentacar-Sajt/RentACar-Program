@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "(АПИ) Додај технологију";
+}
+
+<h2>Додај нову технологију преко АПИ</h2>
+
+<form id="formaDodaj">
+    <div class="mb-3">
+        <label for="nazivTehnologije" class="form-label">Naziv tehnologije</label>
+        <input id="nazivTehnologije" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Dodaj</button>
+    <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+</form>
+
+
+@section Scripts {
+    <script src="~/js/APITehnologije/APITehnologijaDodaj.js"></script>
+}

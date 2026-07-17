@@ -1,0 +1,26 @@
+﻿@model RVS_Aplikacija.ViewModels.TehnologijaViewModel
+
+@{
+    ViewData["Title"] = "Измени технологију";
+}
+
+<h2>Izmeni tehnologiju</h2>
+
+<form asp-action="Izmeni" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="NazivTehnologije" class="form-label"></label>
+        <input asp-for="NazivTehnologije" class="form-control" />
+        <span asp-validation-for="NazivTehnologije" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-warning">Sačuvaj izmene</button>
+    <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

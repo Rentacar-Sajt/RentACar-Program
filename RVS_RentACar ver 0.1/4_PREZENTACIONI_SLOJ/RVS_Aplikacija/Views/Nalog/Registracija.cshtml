@@ -1,0 +1,78 @@
+﻿@model RVS_Aplikacija.ViewModels.RegistracijaViewModel
+
+@{
+    ViewData["Title"] = "Регистрација";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4 text-center">Регистрација</h2>
+
+            @* Poruka iz TempData ako postoji *@
+            @if (TempData["Poruka"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Poruka"]
+                </div>
+            }
+
+            @* Prikaz ModelState grešaka *@
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var greska in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@greska.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form asp-action="Registracija" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="Ime" class="form-label">Име</label>
+                    <input asp-for="Ime" class="form-control" />
+                    <span asp-validation-for="Ime" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Prezime" class="form-label">Презиме</label>
+                    <input asp-for="Prezime" class="form-control" />
+                    <span asp-validation-for="Prezime" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Емаил</label>
+                    <input asp-for="Email" type="email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Lozinka" class="form-label">Лозинка</label>
+                    <input asp-for="Lozinka" type="password" class="form-control" />
+                    <span asp-validation-for="Lozinka" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="LozinkaPotvrda" class="form-label">Потврда лозинке</label>
+                    <input asp-for="LozinkaPotvrda" type="password" class="form-control" />
+                    <span asp-validation-for="LozinkaPotvrda" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Региструј се</button>
+            </form>
+
+            <div class="mt-3 text-center">
+                <span>Већ имате налог? <a asp-action="Prijava">Пријавите се</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
