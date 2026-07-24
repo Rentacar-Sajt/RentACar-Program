@@ -1,0 +1,55 @@
+﻿@model RVS_Aplikacija.ViewModels.KursViewModel
+@{
+    ViewData["Title"] = "Додавање курса";
+}
+<h2>Додавање курса</h2>
+
+<form asp-action="Dodaj" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label>Назив курса</label>
+        <input asp-for="NazivKursa" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Опис курса</label>
+        <textarea asp-for="OpisKursa" class="form-control"></textarea>
+    </div>
+
+    <hr />
+    <h4>Часови</h4>
+
+    <div id="casoviContainer"></div>
+
+    <button type="button" class="btn btn-secondary" onclick="dodajCas()">
+        Додај час
+    </button>
+    <br /><br />
+
+    <button type="submit" class="btn btn-primary">
+        Сачувај
+    </button>
+</form>
+
+<template id="casTemplate">
+    <div class="cas-item border p-3 mb-2">
+        <div class="mb-2">
+            <label>Редни број часа</label>
+            <input class="form-control redniBrojInput" readonly />
+        </div>
+        <div class="mb-2">
+            <label>Технологија</label>
+            <select class="form-control">
+                @foreach (var tehnologijaObjekat in ViewBag.listaTehnologijaObjekata)
+                {
+                    <option value="@tehnologijaObjekat.Id">@tehnologijaObjekat.NazivTehnologije</option>
+                }
+            </select>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="obrisiCas(this)">
+            Обриши час
+        </button>
+    </div>
+</template>
+
+<script src="~/js/kursDodajCas.js"></script>
