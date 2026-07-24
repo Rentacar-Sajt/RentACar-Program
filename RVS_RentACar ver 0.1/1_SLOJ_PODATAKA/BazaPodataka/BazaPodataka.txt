@@ -1,0 +1,105 @@
+CREATE DATABASE RentACar;
+GO
+
+USE RentACar;
+GO
+
+-- Korisnici
+CREATE TABLE Korisnici (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Ime NVARCHAR(32) NOT NULL,
+    Prezime NVARCHAR(32) NOT NULL,
+    Email NVARCHAR(128) NOT NULL UNIQUE,
+    LozinkaHash NVARCHAR(512) NOT NULL,
+    LozinkaSalt NVARCHAR(512) NOT NULL,
+    Uloga NVARCHAR(32) NOT NULL
+);
+GO
+
+CREATE TABLE Klijenti (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Ime NVARCHAR(50) NOT NULL,
+    Prezime NVARCHAR(50) NOT NULL,
+    JMBG NVARCHAR(13) NULL,
+    BrojPasosa NVARCHAR(30) NULL,
+    BrojVozackeDozvole NVARCHAR(30) NOT NULL UNIQUE,
+    DatumIzdavanjaDozvole DATE NOT NULL,
+    Telefon NVARCHAR(30) NOT NULL,
+    Email NVARCHAR(128) NULL,
+    Adresa NVARCHAR(150) NOT NULL
+);
+GO
+
+
+-- Vozilo
+CREATE TABLE Vozila (
+     Id INT IDENTITY(1,1) PRIMARY KEY,
+    Marka NVARCHAR(50) NOT NULL,
+    Model NVARCHAR(50) NOT NULL,
+    Registracija NVARCHAR(20) NOT NULL UNIQUE,
+    CenaPoDanu DECIMAL(10,2) NOT NULL,
+    StatusVozila NVARCHAR(30) NOT NULL
+
+);
+GO
+
+-- Ugovori
+CREATE TABLE Ugovori (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    BrojUgovora NVARCHAR(20) NOT NULL UNIQUE,
+    DatumIzdavanja DATE NOT NULL,
+    DatumPreuzimanja DATETIME2 NOT NULL,
+    DatumVracanja DATETIME2 NOT NULL,
+    MestoPreuzimanja NVARCHAR(100) NOT NULL,
+    MestoVracanja NVARCHAR(100) NOT NULL,
+    NacinPlacanja NVARCHAR(30) NOT NULL,
+    Depozit DECIMAL(10,2) NOT NULL,
+    StatusUgovora NVARCHAR(30) NOT NULL,
+    Napomena NVARCHAR(500) NULL,
+    PopustProcenat DECIMAL(5,2) NOT NULL DEFAULT 0,
+    UkupnoZaPlacanje DECIMAL(12,2) NOT NULL DEFAULT 0,
+    KlijentId INT NOT NULL,
+    KorisnikId INT NOT NULL,
+
+    FOREIGN KEY (KlijentId) REFERENCES Klijenti(Id),
+    FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id)
+);
+GO
+
+-- Stavke ugovora
+CREATE TABLE StavkeUgovora (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UgovorId INT NOT NULL,
+    VoziloId INT NOT NULL,
+    BrojDana INT NOT NULL,
+    CenaPoDanu DECIMAL(10,2) NOT NULL,
+    PopustProcenat DECIMAL(5,2) NOT NULL DEFAULT 0,
+    Ukupno DECIMAL(12,2) NOT NULL,
+
+    FOREIGN KEY (UgovorId)
+        REFERENCES Ugovori(Id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (VoziloId)
+        REFERENCES Vozila(Id)
+);
+GO
+
+-- Unique constraint
+ALTER TABLE Casovi
+ADD CONSTRAINT UQ_Kurs_RedniBroj UNIQUE (KursId, RedniBrojCasa);
+GO
+
+-- seed
+INSERT INTO Tehnologije (NazivTehnologije) VALUES 
+('ASP.NET Core'),
+('React'),
+('Angular'),
+('Vue.js'),
+('SQL Server'),
+('Entity Framework Core'),
+('C#'),
+('JavaScript'),
+('HTML/CSS'),
+('Python');
+GO
