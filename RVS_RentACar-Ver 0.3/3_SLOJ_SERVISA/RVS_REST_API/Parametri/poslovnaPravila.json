@@ -1,0 +1,13 @@
+{
+  "maksimalanBrojPreklapanjaUgovora": 0,
+
+  "minimalanBrojDanaVazenjaDozvoleNakonZavrsetka": 0,
+
+  "minimalanBrojDanaZaPopust": 7,
+  "procenatPopusta": 10,
+
+  "dozvoljeniBrojSatiKasnjenja": 1,
+  "dodatniTrosakPoDanuKasnjenja": 2000,
+
+  "cenaFullOsiguranjaPoDanu": 1000
+}
