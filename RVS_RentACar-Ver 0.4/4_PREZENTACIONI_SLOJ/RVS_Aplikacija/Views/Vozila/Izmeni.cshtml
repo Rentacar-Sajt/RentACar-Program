@@ -1,0 +1,125 @@
+﻿@model RVS_Aplikacija.ViewModels.VoziloViewModel
+
+@{
+    ViewData["Title"] = "Izmeni vozilo";
+}
+
+<h1>Izmeni vozilo</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-controller="Vozila"
+              asp-action="Izmeni"
+              asp-route-id="@Model.Id"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input asp-for="Id" type="hidden" />
+
+            <div asp-validation-summary="All"
+                 class="text-danger">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Marka"
+                       class="form-label"></label>
+
+                <input asp-for="Marka"
+                       class="form-control" />
+
+                <span asp-validation-for="Marka"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Model"
+                       class="form-label"></label>
+
+                <input asp-for="Model"
+                       class="form-control" />
+
+                <span asp-validation-for="Model"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Registracija"
+                       class="form-label"></label>
+
+                <input asp-for="Registracija"
+                       class="form-control" />
+
+                <span asp-validation-for="Registracija"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CenaPoDanu"
+                       class="form-label">
+                    Cena po danu
+                </label>
+
+                <input asp-for="CenaPoDanu"
+                       type="number"
+                       step="0.01"
+                       class="form-control" />
+
+                <span asp-validation-for="CenaPoDanu"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="StatusVozila"
+                       class="form-label">
+                    Status vozila
+                </label>
+
+                <select asp-for="StatusVozila"
+                        class="form-select">
+
+                    <option value="">
+                        Izaberite status
+                    </option>
+
+                    <option value="Slobodno">
+                        Slobodno
+                    </option>
+
+                    <option value="Iznajmljeno">
+                        Iznajmljeno
+                    </option>
+
+                    <option value="Servis">
+                        Servis
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="StatusVozila"
+                      class="text-danger"></span>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Sačuvaj izmene
+            </button>
+
+            <a asp-controller="Vozila"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Nazad
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

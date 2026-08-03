@@ -1,0 +1,356 @@
+﻿@model RVS_Aplikacija.ViewModels.UgovorViewModel
+
+@{
+    ViewData["Title"] = "Dodaj ugovor";
+}
+
+<h2>Dodaj ugovor</h2>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+
+        <form asp-action="Dodaj" method="post">
+
+            <div asp-validation-summary="All"
+                 class="text-danger mb-3">
+            </div>
+
+            <h4>Osnovni podaci</h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="BrojUgovora"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="BrojUgovora"
+                           class="form-control" />
+
+                    <span asp-validation-for="BrojUgovora"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="DatumIzdavanja"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="DatumIzdavanja"
+                           type="date"
+                           class="form-control" />
+
+                    <span asp-validation-for="DatumIzdavanja"
+                          class="text-danger">
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="DatumPreuzimanja"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="DatumPreuzimanja"
+                           type="datetime-local"
+                           class="form-control" />
+
+                    <span asp-validation-for="DatumPreuzimanja"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="DatumVracanja"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="DatumVracanja"
+                           type="datetime-local"
+                           class="form-control" />
+
+                    <span asp-validation-for="DatumVracanja"
+                          class="text-danger">
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="MestoPreuzimanja"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="MestoPreuzimanja"
+                           class="form-control" />
+
+                    <span asp-validation-for="MestoPreuzimanja"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="MestoVracanja"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="MestoVracanja"
+                           class="form-control" />
+
+                    <span asp-validation-for="MestoVracanja"
+                          class="text-danger">
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="KlijentId"
+                           class="form-label">
+                    </label>
+
+                    <select asp-for="KlijentId"
+                            asp-items="Model.KlijentiOpcije"
+                            class="form-select">
+
+                        <option value="">
+                            Izaberite klijenta
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="KlijentId"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="KorisnikId"
+                           class="form-label">
+                    </label>
+
+                    <select asp-for="KorisnikId"
+                            asp-items="Model.KorisniciOpcije"
+                            class="form-select">
+
+                        <option value="">
+                            Izaberite korisnika
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="KorisnikId"
+                          class="text-danger">
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="NacinPlacanja"
+                           class="form-label">
+                    </label>
+
+                    <select asp-for="NacinPlacanja"
+                            class="form-select">
+
+                        <option value="">
+                            Izaberite način plaćanja
+                        </option>
+
+                        <option value="Gotovina">
+                            Gotovina
+                        </option>
+
+                        <option value="Kartica">
+                            Kartica
+                        </option>
+
+                        <option value="Uplata na račun">
+                            Uplata na račun
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="NacinPlacanja"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Depozit"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="Depozit"
+                           type="number"
+                           step="0.01"
+                           min="0"
+                           class="form-control" />
+
+                    <span asp-validation-for="Depozit"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="PopustProcenat"
+                           class="form-label">
+                    </label>
+
+                    <input asp-for="PopustProcenat"
+                           type="number"
+                           step="0.01"
+                           min="0"
+                           max="100"
+                           class="form-control" />
+
+                    <span asp-validation-for="PopustProcenat"
+                          class="text-danger">
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Napomena"
+                       class="form-label">
+                </label>
+
+                <textarea asp-for="Napomena"
+                          class="form-control"
+                          rows="3">
+                </textarea>
+
+                <span asp-validation-for="Napomena"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <input asp-for="StatusUgovora"
+                   type="hidden" />
+
+            <input asp-for="UkupnoZaPlacanje"
+                   type="hidden" />
+
+            <hr />
+
+            <h4>Vozilo</h4>
+
+            <div class="card mb-3">
+                <div class="card-body">
+
+                    <input asp-for="StavkeUgovora[0].BrojDana"
+                           type="hidden" />
+
+                    <input asp-for="StavkeUgovora[0].Ukupno"
+                           type="hidden" />
+
+                    <div asp-validation-for="StavkeUgovora"
+                         class="text-danger mb-2">
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="StavkeUgovora[0].VoziloId"
+                                   class="form-label">
+                                Vozilo
+                            </label>
+
+                            <select asp-for="StavkeUgovora[0].VoziloId"
+                                    asp-items="Model.VozilaOpcije"
+                                    class="form-select">
+
+                                <option value="">
+                                    Izaberite vozilo
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="StavkeUgovora[0].VoziloId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label asp-for="StavkeUgovora[0].CenaPoDanu"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="StavkeUgovora[0].CenaPoDanu"
+                                   type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   class="form-control" />
+
+                            <span asp-validation-for="StavkeUgovora[0].CenaPoDanu"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label asp-for="StavkeUgovora[0].PopustProcenat"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="StavkeUgovora[0].PopustProcenat"
+                                   type="number"
+                                   step="0.01"
+                                   min="0"
+                                   max="100"
+                                   class="form-control" />
+
+                            <span asp-validation-for="StavkeUgovora[0].PopustProcenat"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <p class="text-muted">
+                        Broj dana i ukupan iznos izračunavaju se automatski
+                        prema datumima preuzimanja i vraćanja.
+                    </p>
+
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-success">
+                Sačuvaj ugovor
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Nazad
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

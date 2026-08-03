@@ -1,0 +1,81 @@
+@model IEnumerable<RVS_Aplikacija.ViewModels.VoziloViewModel>
+
+@{
+    ViewData["Title"] = "Vozila";
+}
+@if (TempData["Uspeh"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Uspeh"]
+    </div>
+}
+
+@if (TempData["Greska"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Greska"]
+    </div>
+}
+
+<h1>Vozila</h1>
+
+@if (TempData["Uspeh"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Uspeh"]
+    </div>
+}
+
+<p>
+    <a asp-action="Dodaj" class="btn btn-primary">
+        Dodaj novo vozilo
+    </a>
+</p>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Marka</th>
+            <th>Model</th>
+            <th>Registracija</th>
+            <th>Cena po danu</th>
+            <th>Status</th>
+            <th>Akcije</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var vozilo in Model)
+        {
+            <tr>
+                <td>@vozilo.Marka</td>
+                <td>@vozilo.Model</td>
+                <td>@vozilo.Registracija</td>
+                <td>@vozilo.CenaPoDanu.ToString("N2") din.</td>
+                <td>@vozilo.StatusVozila</td>
+                <td>
+                   <a asp-controller="Vozila"
+                     asp-action="Detalji"
+                     asp-route-id="@vozilo.Id"
+                      class="btn btn-info">
+                       Detalji
+                    </a>
+
+                    <a asp-controller="Vozila"
+                       asp-action="Izmeni"
+                       asp-route-id="@vozilo.Id"
+                       class="btn btn-warning">
+                        Izmeni
+                    </a>
+
+                    <a asp-controller="Vozila"
+                       asp-action="Obrisi"
+                       asp-route-id="@vozilo.Id"
+                       class="btn btn-danger">
+                        Obriši
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

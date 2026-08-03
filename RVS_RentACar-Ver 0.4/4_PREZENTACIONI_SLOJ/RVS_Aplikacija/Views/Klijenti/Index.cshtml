@@ -1,0 +1,73 @@
+﻿@model IEnumerable<RVS_Aplikacija.ViewModels.KlijentViewModel>
+
+@{
+    ViewData["Title"] = "Klijenti";
+}
+
+<h2>Klijenti</h2>
+
+@if (TempData["Uspeh"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Uspeh"]
+    </div>
+}
+
+@if (TempData["Greska"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Greska"]
+    </div>
+}
+
+<p>
+    <a asp-action="Dodaj" class="btn btn-primary">
+        Dodaj novog klijenta
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Ime</th>
+            <th>Prezime</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>JMBG</th>
+            <th>Vozačka dozvola</th>
+            <th width="250">Akcije</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var klijent in Model)
+        {
+            <tr>
+                <td>@klijent.Ime</td>
+                <td>@klijent.Prezime</td>
+                <td>@klijent.Email</td>
+                <td>@klijent.Telefon</td>
+                <td>@klijent.JMBG</td>
+                <td>@klijent.BrojVozackeDozvole</td>
+                <td>
+                    <a asp-action="Detalji"
+                       asp-route-id="@klijent.Id"
+                       class="btn btn-info btn-sm">
+                        Detalji
+                    </a>
+
+                    <a asp-action="Izmeni"
+                       asp-route-id="@klijent.Id"
+                       class="btn btn-warning btn-sm">
+                        Izmeni
+                    </a>
+
+                    <a asp-action="Obrisi"
+                       asp-route-id="@klijent.Id"
+                       class="btn btn-danger btn-sm">
+                        Obriši
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

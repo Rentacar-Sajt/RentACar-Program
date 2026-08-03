@@ -1,0 +1,112 @@
+﻿@model IEnumerable<RVS_Aplikacija.ViewModels.UgovorViewModel>
+
+@{
+    ViewData["Title"] = "Ugovori";
+}
+
+<h2>Ugovori</h2>
+
+@if (TempData["Uspeh"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Uspeh"]
+    </div>
+}
+
+@if (TempData["Greska"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Greska"]
+    </div>
+}
+
+@if (ViewBag.Greska != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Greska
+    </div>
+}
+
+<p>
+    <a asp-action="Dodaj" class="btn btn-primary">
+        Dodaj novi ugovor
+    </a>
+</p>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Broj ugovora</th>
+            <th>Datum izdavanja</th>
+            <th>Klijent</th>
+            <th>Status</th>
+            <th>Ukupno</th>
+            <th width="280">Akcije</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @if (Model.Any())
+        {
+            @foreach (var ugovor in Model)
+            {
+                <tr>
+                    <td>@ugovor.BrojUgovora</td>
+
+                    <td>
+                        @ugovor.DatumIzdavanja.ToString("dd.MM.yyyy.")
+                    </td>
+
+                    <td>
+                        @if (ugovor.KlijentObjekat != null)
+                        {
+                            @($"{ugovor.KlijentObjekat.Ime} " +
+                              $"{ugovor.KlijentObjekat.Prezime}")
+                        }
+                        else
+                        {
+                            @($"ID: {ugovor.KlijentId}")
+                        }
+                    </td>
+
+                    <td>@ugovor.StatusUgovora</td>
+
+                    <td>
+                        @ugovor.UkupnoZaPlacanje.ToString("N2")
+                    </td>
+
+                    <td>
+
+                        <a asp-action="Detalji"
+                           asp-route-id="@ugovor.Id"
+                           class="btn btn-info btn-sm">
+                            Detalji
+                        </a>
+
+                        <a asp-action="PromeniStatus"
+                           asp-route-id="@ugovor.Id"
+                           class="btn btn-warning btn-sm">
+                            Status
+                        </a>
+
+                        <a asp-action="Obrisi"
+                           asp-route-id="@ugovor.Id"
+                           class="btn btn-danger btn-sm">
+                            Obriši
+                        </a>
+
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">
+                    Nema pronađenih ugovora.
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
