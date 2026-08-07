@@ -1,0 +1,200 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    string? imePrezime =
+        Context.Session.GetString("ImePrezime");
+
+    string? uloga =
+        Context.Session.GetString("Uloga");
+
+    bool administratorPrijavljen =
+        Context.Session.GetInt32("KorisnikId") != null &&
+        string.Equals(
+            uloga,
+            "Administrator",
+            StringComparison.OrdinalIgnoreCase
+        );
+}
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - Rent a Car
+    </title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+
+                <a class="navbar-brand fw-bold"
+                   asp-controller="Pocetna"
+                   asp-action="Index">
+                    Rent a Car
+                </a>
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="Prikaži navigaciju">
+
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                    <ul class="navbar-nav flex-grow-1">
+
+                        @if (administratorPrijavljen)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Pocetna"
+                                   asp-action="Index">
+                                    Početna
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Vozila"
+                                   asp-action="Index">
+                                    Vozila
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Klijenti"
+                                   asp-action="Index">
+                                    Klijenti
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Ugovori"
+                                   asp-action="Index">
+                                    Ugovori
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+
+                    <ul class="navbar-nav">
+
+                        @if (administratorPrijavljen)
+                        {
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle"
+                                   href="#"
+                                   id="korisnikDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    Zdravo,
+                                    <strong>
+                                        @imePrezime
+                                    </strong>
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end"
+                                    aria-labelledby="korisnikDropdown">
+
+                                    <li>
+                                        <span class="dropdown-item-text">
+                                            Uloga:
+                                            <strong>@uloga</strong>
+                                        </span>
+                                    </li>
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+                                    <li>
+                                        <form asp-controller="Autentikacija"
+                                              asp-action="Odjava"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="dropdown-item text-danger">
+                                                Odjava
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link text-dark"
+                                   asp-controller="Autentikacija"
+                                   asp-action="Login">
+                                    Prijava
+                                </a>
+
+                            </li>
+                        }
+
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <main role="main"
+              class="pb-3">
+
+            @RenderBody()
+
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Rent a Car
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
+</body>
+</html>

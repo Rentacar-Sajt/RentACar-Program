@@ -1,0 +1,177 @@
+﻿@model RVS_Aplikacija.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Kontrolna tabla";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="fw-bold">Kontrolna tabla</h1>
+
+        <p class="text-muted">
+            Pregled trenutnog stanja Rent a Car sistema.
+        </p>
+    </div>
+
+    @if (ViewBag.Greska != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Greska
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">
+                        Ukupno vozila
+                    </p>
+
+                    <h2 class="fw-bold mb-0">
+                        @Model.BrojVozila
+                    </h2>
+                </div>
+
+                <div class="card-footer bg-white border-0">
+                    <a asp-controller="Vozila"
+                       asp-action="Index"
+                       class="btn btn-primary w-100">
+                        Pregled vozila
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">
+                        Slobodna vozila
+                    </p>
+
+                    <h2 class="fw-bold text-success mb-0">
+                        @Model.SlobodnaVozila
+                    </h2>
+                </div>
+
+                <div class="card-footer bg-white border-0">
+                    <a asp-controller="Vozila"
+                       asp-action="Index"
+                       asp-route-status="Slobodno"
+                       class="btn btn-outline-success w-100">
+                        Prikaži slobodna vozila
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">
+                        Zauzeta vozila
+                    </p>
+
+                    <h2 class="fw-bold text-danger mb-0">
+                        @Model.ZauzetaVozila
+                    </h2>
+                </div>
+
+                <div class="card-footer bg-white border-0">
+                    <a asp-controller="Vozila"
+                       asp-action="Index"
+                       asp-route-status="Zauzeto"
+                       class="btn btn-outline-danger w-100">
+                        Prikaži zauzeta vozila
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">
+                        Ukupno klijenata
+                    </p>
+
+                    <h2 class="fw-bold mb-0">
+                        @Model.BrojKlijenata
+                    </h2>
+                </div>
+
+                <div class="card-footer bg-white border-0">
+                    <a asp-controller="Klijenti"
+                       asp-action="Index"
+                       class="btn btn-outline-primary w-100">
+                        Upravljanje klijentima
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">
+                        Aktivni ugovori
+                    </p>
+
+                    <h2 class="fw-bold text-warning mb-0">
+                        @Model.AktivniUgovori
+                    </h2>
+                </div>
+
+                <div class="card-footer bg-white border-0">
+                    <a asp-controller="Ugovori"
+                       asp-action="Index"
+                       class="btn btn-outline-warning w-100">
+                        Upravljanje ugovorima
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0 mt-5">
+        <div class="card-body">
+
+            <h4 class="fw-bold mb-3">
+                Brze akcije
+            </h4>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <a asp-controller="Vozila"
+                       asp-action="Dodaj"
+                       class="btn btn-primary btn-lg w-100">
+                        Dodaj vozilo
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a asp-controller="Klijenti"
+                       asp-action="Dodaj"
+                       class="btn btn-success btn-lg w-100">
+                        Dodaj klijenta
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a asp-controller="Ugovori"
+                       asp-action="Dodaj"
+                       class="btn btn-warning btn-lg w-100">
+                        Dodaj ugovor
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,69 @@
+﻿@model RVS_MVC.ViewModels.LoginModel
+
+@{
+    ViewData["Title"] = "Prijava administratora";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">
+                        Prijava administratora
+                    </h2>
+
+                    <form asp-controller="Autentikacija"
+                          asp-action="Login"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   placeholder="admin@rentacar.rs"
+                                   autocomplete="email" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Lozinka"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Lozinka"
+                                   class="form-control"
+                                   placeholder="Unesite lozinku"
+                                   autocomplete="current-password" />
+
+                            <span asp-validation-for="Lozinka"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Prijavi se
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

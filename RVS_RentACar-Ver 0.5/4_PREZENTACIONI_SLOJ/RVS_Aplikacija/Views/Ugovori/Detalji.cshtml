@@ -1,0 +1,266 @@
+﻿@model RVS_Aplikacija.ViewModels.UgovorViewModel
+
+@{
+    ViewData["Title"] = "Detalji ugovora";
+}
+
+<h2>Detalji ugovora</h2>
+
+<hr />
+
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Ugovor @Model.BrojUgovora</strong>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>Broj ugovora:</strong><br />
+                @Model.BrojUgovora
+            </div>
+
+            <div class="col-md-4">
+                <strong>Datum izdavanja:</strong><br />
+                @Model.DatumIzdavanja.ToString("dd.MM.yyyy.")
+            </div>
+
+            <div class="col-md-4">
+                <strong>Status:</strong><br />
+
+                @if (Model.StatusUgovora == "Aktivan")
+                {
+                    <span class="badge bg-success">
+                        @Model.StatusUgovora
+                    </span>
+                }
+                else if (Model.StatusUgovora == "Završen")
+                {
+                    <span class="badge bg-primary">
+                        @Model.StatusUgovora
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">
+                        @Model.StatusUgovora
+                    </span>
+                }
+            </div>
+        </div>
+
+        <hr />
+
+        <h5>Klijent i korisnik</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Klijent:</strong><br />
+
+                @if (Model.KlijentObjekat != null)
+                {
+                    <span>
+                        @Model.KlijentObjekat.Ime
+                        @Model.KlijentObjekat.Prezime
+                    </span>
+
+                    <br />
+
+                    <small class="text-muted">
+                        @Model.KlijentObjekat.Email
+                    </small>
+                }
+                else
+                {
+                    <span>ID: @Model.KlijentId</span>
+                }
+            </div>
+
+            <div class="col-md-6">
+                <strong>Korisnik koji je napravio ugovor:</strong><br />
+
+                @if (Model.KorisnikObjekat != null)
+                {
+                    <span>
+                        @Model.KorisnikObjekat.Ime
+                        @Model.KorisnikObjekat.Prezime
+                    </span>
+
+                    <br />
+
+                    <small class="text-muted">
+                        @Model.KorisnikObjekat.Uloga
+                    </small>
+                }
+                else
+                {
+                    <span>ID: @Model.KorisnikId</span>
+                }
+            </div>
+        </div>
+
+        <hr />
+
+        <h5>Period iznajmljivanja</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Datum preuzimanja:</strong><br />
+                @Model.DatumPreuzimanja.ToString("dd.MM.yyyy. HH:mm")
+            </div>
+
+            <div class="col-md-6">
+                <strong>Datum vraćanja:</strong><br />
+                @Model.DatumVracanja.ToString("dd.MM.yyyy. HH:mm")
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Mesto preuzimanja:</strong><br />
+                @Model.MestoPreuzimanja
+            </div>
+
+            <div class="col-md-6">
+                <strong>Mesto vraćanja:</strong><br />
+                @Model.MestoVracanja
+            </div>
+        </div>
+
+        <hr />
+
+        <h5>Plaćanje</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <strong>Način plaćanja:</strong><br />
+                @Model.NacinPlacanja
+            </div>
+
+            <div class="col-md-3">
+                <strong>Depozit:</strong><br />
+                @Model.Depozit.ToString("N2")
+            </div>
+
+            <div class="col-md-3">
+                <strong>Popust ugovora:</strong><br />
+                @Model.PopustProcenat.ToString("N2") %
+            </div>
+
+            <div class="col-md-3">
+                <strong>Ukupno za plaćanje:</strong><br />
+                <span class="fw-bold text-success">
+                    @Model.UkupnoZaPlacanje.ToString("N2")
+                </span>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Napomena))
+        {
+            <div class="mb-3">
+                <strong>Napomena:</strong>
+
+                <div class="border rounded p-2 mt-1">
+                    @Model.Napomena
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<h4>Vozila i stavke ugovora</h4>
+
+@if (Model.StavkeUgovora == null ||
+     Model.StavkeUgovora.Count == 0)
+{
+    <div class="alert alert-warning">
+        Ugovor nema evidentirane stavke.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Vozilo</th>
+                    <th>Registracija</th>
+                    <th>Broj dana</th>
+                    <th>Cena po danu</th>
+                    <th>Popust</th>
+                    <th>Ukupno</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var stavka in Model.StavkeUgovora)
+                {
+                    <tr>
+                        <td>
+                            @if (stavka.VoziloObjekat != null)
+                            {
+                                @($"{stavka.VoziloObjekat.Marka} " +
+                                  $"{stavka.VoziloObjekat.Model}")
+                            }
+                            else
+                            {
+                                @($"Vozilo ID: {stavka.VoziloId}")
+                            }
+                        </td>
+
+                        <td>
+                            @if (stavka.VoziloObjekat != null)
+                            {
+                                @stavka.VoziloObjekat.Registracija
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @stavka.BrojDana
+                        </td>
+
+                        <td>
+                            @stavka.CenaPoDanu.ToString("N2")
+                        </td>
+
+                        <td>
+                            @stavka.PopustProcenat.ToString("N2") %
+                        </td>
+
+                        <td>
+                            <strong>
+                                @stavka.Ukupno.ToString("N2")
+                            </strong>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-action="PromeniStatus"
+       asp-route-id="@Model.Id"
+       class="btn btn-warning">
+        Promeni status
+    </a>
+
+    <a asp-controller="Ugovori"
+       asp-action="PreuzmiPdf"
+       asp-route-id="@Model.Id"
+       class="btn btn-danger">
+        Preuzmi PDF ugovor
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Nazad na ugovore
+    </a>
+</div>
