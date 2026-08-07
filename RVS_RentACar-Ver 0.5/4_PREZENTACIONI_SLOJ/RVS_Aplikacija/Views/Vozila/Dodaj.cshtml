@@ -1,0 +1,103 @@
+@model RVS_Aplikacija.ViewModels.VoziloViewModel
+
+@{
+    ViewData["Title"] = "Dodaj vozilo";
+}
+
+<h1>Dodaj vozilo</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-controller="Vozila"
+              asp-action="Dodaj"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Marka" class="form-label"></label>
+                <input asp-for="Marka"
+                       name="Marka"
+                       class="form-control" />
+                <span asp-validation-for="Marka"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Model" class="form-label"></label>
+                <input asp-for="Model"
+                       name="Model"
+                       class="form-control" />
+                <span asp-validation-for="Model"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Registracija"
+                       class="form-label"></label>
+
+                <input asp-for="Registracija"
+                       name="Registracija"
+                       class="form-control" />
+
+                <span asp-validation-for="Registracija"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CenaPoDanu"
+                       class="form-label"></label>
+
+                <input asp-for="CenaPoDanu"
+                       name="CenaPoDanu"
+                       type="number"
+                       step="0.01"
+                       class="form-control" />
+
+                <span asp-validation-for="CenaPoDanu"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="StatusVozila"
+                       class="form-label"></label>
+
+                <select asp-for="StatusVozila"
+                        name="StatusVozila"
+                        class="form-select">
+
+                    <option value="">Izaberite status</option>
+                    <option value="Slobodno">Slobodno</option>
+                    <option value="Iznajmljeno">Iznajmljeno</option>
+                    <option value="Servis">Servis</option>
+
+                </select>
+
+                <span asp-validation-for="StatusVozila"
+                      class="text-danger"></span>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Sačuvaj
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Nazad
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

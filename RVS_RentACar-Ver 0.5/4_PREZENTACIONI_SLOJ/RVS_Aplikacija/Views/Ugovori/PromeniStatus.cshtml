@@ -1,0 +1,88 @@
+﻿@model RVS_Aplikacija.ViewModels.PromenaStatusaUgovoraViewModel
+
+@{
+    ViewData["Title"] = "Promena statusa ugovora";
+}
+
+<h2>Promena statusa ugovora</h2>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Ugovor @Model.BrojUgovora</strong>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="PromeniStatus"
+                      asp-route-id="@Model.Id"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="Id" type="hidden" />
+
+                    <div asp-validation-summary="All"
+                         class="text-danger mb-3">
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BrojUgovora"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="BrojUgovora"
+                               class="form-control"
+                               readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TrenutniStatus"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="TrenutniStatus"
+                               class="form-control"
+                               readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NoviStatus"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="NoviStatus"
+                                asp-items="Model.StatusiOpcije"
+                                class="form-select">
+                            <option value="">
+                                -- Izaberite novi status --
+                            </option>
+                        </select>
+
+                        <span asp-validation-for="NoviStatus"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Sačuvaj status
+                    </button>
+
+                    <a asp-action="Detalji"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-secondary">
+                        Odustani
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
