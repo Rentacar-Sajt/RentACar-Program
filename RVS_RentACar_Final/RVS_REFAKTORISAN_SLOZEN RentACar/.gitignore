@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+**/.vs/
+
+# Build output
+bin/
+obj/
+**/bin/
+**/obj/
+
+# User files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Databases
+*.db
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+TestResults/

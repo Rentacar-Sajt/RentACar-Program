@@ -1,0 +1,114 @@
+@model RVS_Aplikacija.ViewModels.VoziloViewModel
+
+@{ ViewData["Title"] = "Dodaj vozilo"; }
+
+<h1>Dodaj vozilo</h1>
+<hr />
+<div class="row">
+    <div class="col-xl-9">
+        @* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-controller="Vozila" asp-action="Dodaj" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Marka" class="form-label"></label>
+                    <input asp-for="Marka" class="form-control" />
+                    <span asp-validation-for="Marka" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Model" class="form-label"></label>
+                    <input asp-for="Model" class="form-control" />
+                    <span asp-validation-for="Model" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Registracija" class="form-label"></label>
+                    <input asp-for="Registracija" class="form-control" />
+                    <span asp-validation-for="Registracija" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Godiste" class="form-label"></label>
+                    <input asp-for="Godiste" type="number" class="form-control" />
+                    <span asp-validation-for="Godiste" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Gorivo" class="form-label"></label>
+                    <select asp-for="Gorivo" class="form-select">
+                        <option value="">Izaberite gorivo</option>
+                        <option value="Benzin">Benzin</option><option value="Dizel">Dizel</option>
+                        <option value="Hibrid">Hibrid</option><option value="Električni">Električni</option>
+                        <option value="TNG">TNG</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Menjac" class="form-label"></label>
+                    <select asp-for="Menjac" class="form-select">
+                        <option value="">Izaberite menjač</option>
+                        <option value="Manuelni">Manuelni</option><option value="Automatski">Automatski</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Kilometraza" class="form-label"></label>
+                    <input asp-for="Kilometraza" type="number" min="0" class="form-control" />
+                    <span asp-validation-for="Kilometraza" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Boja" class="form-label"></label>
+                    <input asp-for="Boja" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="BrojSedista" class="form-label"></label>
+                    <input asp-for="BrojSedista" type="number" min="1" class="form-control" />
+                    <span asp-validation-for="BrojSedista" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="ZapreminaMotora" class="form-label"></label>
+                    <input asp-for="ZapreminaMotora" type="number" step="0.1" min="0.1" class="form-control" />
+                    <span asp-validation-for="ZapreminaMotora" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="SnagaMotora" class="form-label"></label>
+                    <input asp-for="SnagaMotora" type="number" min="1" class="form-control" />
+                    <span asp-validation-for="SnagaMotora" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CenaPoDanu" class="form-label"></label>
+                    <input asp-for="CenaPoDanu" type="number" step="0.01" min="0.01" class="form-control" />
+                    <span asp-validation-for="CenaPoDanu" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StatusVozila" class="form-label"></label>
+                    <select asp-for="StatusVozila" class="form-select">
+                        <option value="">Izaberite status</option>
+                        <option value="Slobodno">Slobodno</option>
+                        <option value="Iznajmljeno">Iznajmljeno</option>
+                        <option value="Servis">Servis</option>
+                    </select>
+                    <span asp-validation-for="StatusVozila" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SlikaFajl" class="form-label"></label>
+                    <input asp-for="SlikaFajl" type="file" accept=".jpg,.jpeg,.png,.webp,image/*" class="form-control" />
+                    <div class="form-text">JPG, PNG ili WEBP, maksimalno 5 MB.</div>
+                    <span asp-validation-for="SlikaFajl" class="text-danger"></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Sačuvaj</button>
+            <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+        </form>
+    </div>
+</div>
+
+@* Scripts sekcija se renderuje na dnu layout-a; ovde su validacija i dinamičko ponašanje forme. *@
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

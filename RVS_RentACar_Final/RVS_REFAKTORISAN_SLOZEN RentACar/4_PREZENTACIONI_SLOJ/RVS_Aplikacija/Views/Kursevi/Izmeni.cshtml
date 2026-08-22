@@ -1,0 +1,127 @@
+@model RVS_Aplikacija.ViewModels.KursViewModel
+
+@{
+    ViewData["Title"] = "Измена курса";
+}
+
+<h2>Измена курса</h2>
+
+@* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-action="Izmeni" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label>Назив курса</label>
+        <input asp-for="NazivKursa" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Опис курса</label>
+        <textarea asp-for="OpisKursa" class="form-control"></textarea>
+    </div>
+
+    <hr />
+
+    <h4>Часови</h4>
+
+    <div id="casoviContainer">
+
+        @if (Model.Casovi != null && Model.Casovi.Count > 0)
+        {
+            for (int i = 0; i < Model.Casovi.Count; i++)
+            {
+                <div class="cas-item border p-3 mb-2">
+
+                    <div class="mb-2">
+                        <label>Редни број часа</label>
+                        <input class="form-control redniBrojInput"
+                               name="Casovi[@i].RedniBrojCasa"
+                               value="@Model.Casovi[i].RedniBrojCasa"
+                               readonly />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Технологија</label>
+
+                        <select class="form-control"
+                                name="Casovi[@i].TehnologijaObjekat.Id">
+
+                            @foreach (var t in ViewBag.listaTehnologijaObjekata)
+                            {
+                                if (Model.Casovi[i].TehnologijaObjekat != null &&
+                                Model.Casovi[i].TehnologijaObjekat.Id == t.Id)
+                                {
+                                    <option value="@t.Id" selected>
+                                        @t.NazivTehnologije
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@t.Id">
+                                        @t.NazivTehnologije
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <button type="button" class="btn btn-danger"
+                            onclick="obrisiCas(this)">
+                        Обриши час
+                    </button>
+
+                </div>
+            }
+        }
+
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="dodajCas()">
+        Додај час
+    </button>
+
+    <br /><br />
+
+    <button type="submit" class="btn btn-primary">
+        Сачувај измене
+    </button>
+</form>
+
+<hr />
+
+<!-- TEMPLATE ZA NOVI ČAS -->
+<template id="casTemplate">
+    <div class="cas-item border p-3 mb-2">
+
+        <div class="mb-2">
+            <label>Редни број часа</label>
+            <input class="form-control redniBrojInput" readonly />
+        </div>
+
+        <div class="mb-2">
+            <label>Технологија</label>
+
+            <select class="form-control">
+                @foreach (var t in ViewBag.listaTehnologijaObjekata)
+                {
+                    <option value="@t.Id">
+                        @t.NazivTehnologije
+                    </option>
+                }
+            </select>
+
+        </div>
+
+        <button type="button" class="btn btn-danger"
+                onclick="obrisiCas(this)">
+            Обриши час
+        </button>
+
+    </div>
+</template>
+
+<script src="/js/kursIzmeniCas.js"></script>

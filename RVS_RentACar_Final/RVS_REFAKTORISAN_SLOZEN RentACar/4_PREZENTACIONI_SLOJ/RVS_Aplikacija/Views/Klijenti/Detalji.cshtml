@@ -1,0 +1,100 @@
+@model RVS_Aplikacija.ViewModels.KlijentViewModel
+
+@{
+    ViewData["Title"] = "Detalji klijenta";
+}
+
+<h2>Detalji klijenta</h2>
+
+<hr />
+
+<div class="card">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-4">
+                Ime
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Ime
+            </dd>
+
+            <dt class="col-sm-4">
+                Prezime
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Prezime
+            </dd>
+
+            <dt class="col-sm-4">
+                Email
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Email
+            </dd>
+
+            <dt class="col-sm-4">
+                JMBG
+            </dt>
+            <dd class="col-sm-8">
+                @Model.JMBG
+            </dd>
+
+            <dt class="col-sm-4">
+                Broj pasoša
+            </dt>
+            <dd class="col-sm-8">
+                @Model.BrojPasosa
+            </dd>
+
+            <dt class="col-sm-4">
+                Broj vozačke dozvole
+            </dt>
+            <dd class="col-sm-8">
+                @Model.BrojVozackeDozvole
+            </dd>
+
+            <dt class="col-sm-4">
+                Datum izdavanja dozvole
+            </dt>
+            <dd class="col-sm-8">
+                @Model.DatumIzdavanjaDozvole.ToString("dd.MM.yyyy.")
+            </dd>
+
+            <dt class="col-sm-4">
+                Datum isteka vozačke dozvole
+            </dt>
+            <dd class="col-sm-8">
+                @Model.DatumIstekaVozackeDozvole.ToString("dd.MM.yyyy.")
+            </dd>
+
+            <dt class="col-sm-4">
+                Telefon
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Telefon
+            </dd>
+
+            <dt class="col-sm-4">
+                Adresa
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Adresa
+            </dd>
+
+        </dl>
+
+        <a asp-action="Izmeni"
+           asp-route-id="@Model.Id"
+           class="btn btn-warning">
+            Izmeni
+        </a>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Nazad na listu
+        </a>
+
+    </div>
+</div>

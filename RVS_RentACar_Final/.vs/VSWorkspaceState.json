@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA\\BibliotekaKlasa",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA\\BibliotekaKlasa\\KlasePodatakaEF",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA\\BibliotekaKlasa\\KlasePodatakaEF\\KontekstEF",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA\\BibliotekaKlasa\\KlasePodatakaEF\\ModeliEF",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA\\BibliotekaKlasa\\KlasePodatakaEF\\RepozitorijumiEF",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\3_SLOJ_SERVISA",
+    "\\RVS_REFAKTORISAN_SLOZEN RentACar\\3_SLOJ_SERVISA\\REST_SERVIS_CRUD_Operacija"
+  ],
+  "SelectedNode": "\\RVS_REFAKTORISAN_SLOZEN RentACar\\1_SLOJ_PODATAKA\\BibliotekaKlasa\\KlasePodatakaEF\\RepozitorijumiEF\\KlijentEntityRepo.cs",
+  "PreviewInSolutionExplorer": false
+}

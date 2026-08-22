@@ -1,0 +1,410 @@
+-- ============================================================================
+-- OBJAŠNJENJE ZA ODBRANU PROJEKTA
+-- Ovaj fajl pripada sloju podataka i sadrži SQL definicije koje izvršava SQL Server.
+-- Stored procedure centralizuje složenije operacije u bazi i omogućava da C# kod
+-- prosledi parametre bez sastavljanja SQL naredbi iz korisničkog unosa.
+-- Transakcije se koriste tamo gde više izmena mora uspeti ili pasti kao jedna celina.
+-- ============================================================================
+
+CREATE DATABASE RentACar;
+GO
+
+USE RentACar;
+GO
+
+-- Korisnici
+CREATE TABLE Korisnici (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Ime NVARCHAR(32) NOT NULL,
+    Prezime NVARCHAR(32) NOT NULL,
+    Email NVARCHAR(128) NOT NULL UNIQUE,
+    LozinkaHash NVARCHAR(512) NOT NULL,
+    LozinkaSalt NVARCHAR(512) NOT NULL,
+    Uloga NVARCHAR(32) NOT NULL
+);
+GO
+
+CREATE TABLE Klijenti (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Ime NVARCHAR(50) NOT NULL,
+    Prezime NVARCHAR(50) NOT NULL,
+    JMBG NVARCHAR(13) NULL,
+    BrojPasosa NVARCHAR(30) NULL,
+    BrojVozackeDozvole NVARCHAR(30) NOT NULL UNIQUE,
+    DatumIzdavanjaDozvole DATE NOT NULL,
+    Telefon NVARCHAR(30) NOT NULL,
+    Email NVARCHAR(128) NULL,
+    Adresa NVARCHAR(150) NOT NULL
+);
+GO
+
+
+-- Vozilo
+CREATE TABLE Vozila (
+     Id INT IDENTITY(1,1) PRIMARY KEY,
+    Marka NVARCHAR(50) NOT NULL,
+    Model NVARCHAR(50) NOT NULL,
+    Registracija NVARCHAR(20) NOT NULL UNIQUE,
+    CenaPoDanu DECIMAL(10,2) NOT NULL,
+    StatusVozila NVARCHAR(30) NOT NULL,
+    Godiste INT NULL,
+    Gorivo NVARCHAR(30) NULL,
+    Menjac NVARCHAR(30) NULL,
+    Kilometraza INT NULL,
+    Boja NVARCHAR(30) NULL,
+    BrojSedista INT NULL,
+    ZapreminaMotora DECIMAL(6,2) NULL,
+    SnagaMotora INT NULL,
+    SlikaPutanja NVARCHAR(300) NULL
+);
+GO
+
+-- Ugovori
+CREATE TABLE Ugovori (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    BrojUgovora NVARCHAR(20) NOT NULL UNIQUE,
+    DatumIzdavanja DATE NOT NULL,
+    DatumPreuzimanja DATETIME2 NOT NULL,
+    DatumVracanja DATETIME2 NOT NULL,
+    StvarniDatumVracanja DATETIME2 NULL,
+    BrojDanaKasnjenja INT NOT NULL DEFAULT 0,
+    KaznaZaKasnjenje DECIMAL(12,2) NOT NULL DEFAULT 0,
+    MestoPreuzimanja NVARCHAR(100) NOT NULL,
+    MestoVracanja NVARCHAR(100) NOT NULL,
+    NacinPlacanja NVARCHAR(30) NOT NULL,
+    Depozit DECIMAL(10,2) NOT NULL,
+    StatusUgovora NVARCHAR(30) NOT NULL,
+    Napomena NVARCHAR(500) NULL,
+    PopustProcenat DECIMAL(5,2) NOT NULL DEFAULT 0,
+    UkupnoZaPlacanje DECIMAL(12,2) NOT NULL DEFAULT 0,
+    KlijentId INT NOT NULL,
+    KorisnikId INT NOT NULL,
+
+    FOREIGN KEY (KlijentId) REFERENCES Klijenti(Id),
+    FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id)
+);
+GO
+
+-- Stavke ugovora
+CREATE TABLE StavkeUgovora (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UgovorId INT NOT NULL,
+    VoziloId INT NOT NULL,
+    BrojDana INT NOT NULL,
+    CenaPoDanu DECIMAL(10,2) NOT NULL,
+    PopustProcenat DECIMAL(5,2) NOT NULL DEFAULT 0,
+    Ukupno DECIMAL(12,2) NOT NULL,
+
+    FOREIGN KEY (UgovorId)
+        REFERENCES Ugovori(Id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (VoziloId)
+        REFERENCES Vozila(Id)
+);
+GO
+
+/* Jedinstvenost JMBG-a kada je unet */
+CREATE UNIQUE INDEX UX_Klijenti_JMBG
+ON Klijenti(JMBG)
+WHERE JMBG IS NOT NULL;
+GO
+
+/* Jedno vozilo ne sme biti dva puta u istom ugovoru */
+ALTER TABLE StavkeUgovora
+ADD CONSTRAINT UQ_Ugovor_Vozilo
+UNIQUE (UgovorId, VoziloId);
+GO
+
+/* Provera dozvoljenih statusa vozila */
+ALTER TABLE Vozila
+ADD CONSTRAINT CK_Vozila_Status
+CHECK (StatusVozila IN (N'Slobodno', N'Iznajmljeno', N'Servis'));
+GO
+
+/* Provera dozvoljenih statusa ugovora */
+ALTER TABLE Ugovori
+ADD CONSTRAINT CK_Ugovori_Status
+CHECK (StatusUgovora IN (N'Aktivan', N'Završen', N'Otkazan'));
+GO
+
+/* Provera načina plaćanja */
+ALTER TABLE Ugovori
+ADD CONSTRAINT CK_Ugovori_NacinPlacanja
+CHECK (NacinPlacanja IN (N'Gotovina', N'Kartica', N'Online'));
+GO
+
+/* Datumi moraju biti ispravnim redosledom */
+ALTER TABLE Ugovori
+ADD CONSTRAINT CK_Ugovori_Datumi
+CHECK (DatumVracanja > DatumPreuzimanja);
+GO
+
+/* Broj dana i cene moraju biti pozitivni */
+ALTER TABLE StavkeUgovora
+ADD CONSTRAINT CK_StavkeUgovora_BrojDana
+CHECK (BrojDana > 0);
+GO
+
+ALTER TABLE StavkeUgovora
+ADD CONSTRAINT CK_StavkeUgovora_Cena
+CHECK (CenaPoDanu >= 0 AND Ukupno >= 0);
+GO
+
+ALTER TABLE Vozila
+ADD CONSTRAINT CK_Vozila_CenaPoDanu
+CHECK (CenaPoDanu > 0);
+GO
+
+ALTER TABLE Ugovori
+ADD CONSTRAINT CK_Ugovori_Iznosi
+CHECK
+(
+    Depozit >= 0
+    AND PopustProcenat BETWEEN 0 AND 100
+    AND UkupnoZaPlacanje >= 0
+);
+GO
+
+INSERT INTO Vozila
+(
+    Marka,
+    Model,
+    Registracija,
+    CenaPoDanu,
+    StatusVozila
+)
+VALUES
+(N'Audi', N'A4', N'BG-123-AA', 5000.00, N'Slobodno'),
+(N'Volkswagen', N'Golf 7', N'NS-456-BB', 4500.00, N'Slobodno'),
+(N'Škoda', N'Octavia', N'PA-789-CC', 4200.00, N'Slobodno'),
+(N'Fiat', N'Punto', N'BG-321-DD', 3000.00, N'Servis');
+GO
+
+INSERT INTO Klijenti
+(
+    Ime,
+    Prezime,
+    JMBG,
+    BrojPasosa,
+    BrojVozackeDozvole,
+    DatumIzdavanjaDozvole,
+    Telefon,
+    Email,
+    Adresa
+)
+VALUES
+(
+    N'Petar',
+    N'Petrović',
+    N'0101990710018',
+    NULL,
+    N'012345678',
+    '2020-05-15',
+    N'0641234567',
+    N'petar.petrovic@email.com',
+    N'Bulevar oslobođenja 10, Beograd'
+);
+GO
+
+SELECT * FROM Klijenti;
+
+ALTER TABLE Klijenti
+ADD DatumIstekaVozackeDozvole DATE NULL;
+GO
+
+UPDATE Klijenti
+SET DatumIstekaVozackeDozvole='2035-12-31';
+
+SELECT DB_NAME() AS TrenutnaBaza;
+
+USE RentACar;
+GO
+
+SELECT name
+FROM sys.procedures
+WHERE name = 'spDajSvaVozila';
+
+USE RentACar;
+GO
+
+CREATE OR ALTER PROCEDURE spDajSvaVozila
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Marka,
+        Model,
+        Registracija,
+        CenaPoDanu,
+        StatusVozila
+    FROM Vozila
+    ORDER BY Id;
+END;
+GO
+
+EXEC spDajSvaVozila;
+
+USE RentACar;
+GO
+
+SELECT name
+FROM sys.procedures
+WHERE name LIKE '%Klijent%'
+ORDER BY name;
+
+UPDATE Klijenti
+SET DatumIstekaVozackeDozvole = '2030-05-15'
+WHERE Id = 1;
+
+SELECT *
+FROM Klijenti
+ORDER BY Id DESC;
+
+DELETE FROM Klijenti
+WHERE Id = 2;
+
+SELECT * FROM Ugovori;
+SELECT * FROM StavkeUgovora;
+SELECT Id, Marka, Model, StatusVozila
+FROM Vozila;
+
+SELECT DB_NAME() AS TrenutnaBaza;
+
+SELECT *
+FROM Korisnici
+WHERE Id = 1;
+
+SELECT
+    @@SERVERNAME AS ServerNaziv,
+    DB_NAME() AS BazaNaziv;
+
+    SELECT COUNT(*) AS BrojKorisnika
+FROM Korisnici;
+
+SELECT *
+FROM Korisnici;
+
+INSERT INTO Korisnici
+(
+    Ime,
+    Prezime,
+    Email,
+    LozinkaHash,
+    LozinkaSalt,
+    Uloga
+)
+VALUES
+(
+    N'Admin',
+    N'Korisnik',
+    N'admin@rentacar.rs',
+    N'test_hash',
+    N'test_salt',
+    N'Administrator'
+);
+
+SELECT Id, BrojUgovora, StatusUgovora
+FROM Ugovori
+WHERE Id = 2;
+
+SELECT Id, Marka, Model, StatusVozila
+FROM Vozila
+WHERE Id = 1;
+
+----
+SELECT *
+FROM Ugovori
+WHERE Id = 2;
+
+SELECT *
+FROM StavkeUgovora
+WHERE UgovorId = 2;
+
+SELECT Id, Marka, Model, StatusVozila
+FROM Vozila
+WHERE Id = 1;
+
+SELECT Id, Marka, Model, Registracija
+FROM Vozila;
+
+SELECT @@SERVERNAME, DB_NAME();
+
+SELECT COUNT(*) AS BrojVozila
+FROM Vozila;
+
+SELECT TOP 10 *
+FROM vwSviUgovori;
+
+ALTER TABLE Vozila
+DROP CONSTRAINT CK_Vozila_Status;
+GO
+
+ALTER TABLE Vozila
+ADD CONSTRAINT CK_Vozila_Status
+CHECK
+(
+    StatusVozila IN
+    (
+        N'Slobodno',
+        N'Zauzeto',
+        N'Servis'
+    )
+);
+GO
+
+SELECT definition
+FROM sys.check_constraints
+WHERE name = 'CK_Vozila_Status';
+
+CREATE OR ALTER PROCEDURE spDajKorisnikaPoEmailu
+    @Email NVARCHAR(128)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Ime,
+        Prezime,
+        Email,
+        Uloga,
+        LozinkaHash
+    FROM Korisnici
+    WHERE Email = @Email;
+END;
+GO
+
+USE RentACar;
+GO
+
+UPDATE Korisnici
+SET LozinkaHash =
+    N'$2a$11$mqaT85VA4AqdTsTNTRGhauT0wIFgN55gIvW71nHbg.53.ZEGi9bYC'
+WHERE Email = N'admin@rentacar.rs';
+GO
+
+SELECT
+    Id,
+    Ime,
+    Prezime,
+    Email,
+    Uloga,
+    LozinkaHash
+FROM Korisnici
+WHERE Email = N'admin@rentacar.rs';
+
+USE RentACar;
+GO
+
+IF COL_LENGTH(
+    'dbo.Ugovori',
+    'IzabraneDodatneUsluge'
+) IS NULL
+BEGIN
+    ALTER TABLE dbo.Ugovori
+    ADD IzabraneDodatneUsluge NVARCHAR(100) NULL;
+END;
+GO

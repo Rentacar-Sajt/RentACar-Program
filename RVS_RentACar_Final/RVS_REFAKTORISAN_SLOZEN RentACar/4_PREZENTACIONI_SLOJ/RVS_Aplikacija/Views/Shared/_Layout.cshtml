@@ -1,0 +1,879 @@
+@using Microsoft.AspNetCore.Http
+
+@{
+    string? imePrezime =
+        Context.Session.GetString("ImePrezime");
+
+    string? uloga =
+        Context.Session.GetString("Uloga");
+
+    bool administratorPrijavljen =
+        Context.Session.GetInt32("KorisnikId") != null &&
+        string.Equals(
+            uloga,
+            "Administrator",
+            StringComparison.OrdinalIgnoreCase
+        );
+
+    string trenutniKontroler =
+        ViewContext.RouteData.Values["controller"]?
+            .ToString() ?? string.Empty;
+}
+
+<!DOCTYPE html>
+
+<html lang="sr">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - Rent a Car
+    </title>
+
+    <!-- Učitava sačuvanu temu pre prikazivanja stranice -->
+    <script>
+            (function () {
+                const tema = localStorage.getItem("rentacar-tema");
+
+                if (tema === "dark") {
+                    document.documentElement.classList.add("dark-mode");
+                }
+            })();
+    </script>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <style>
+            :root {
+                --app-background: #f4f6f9;
+                --app-surface: #ffffff;
+                --app-surface-secondary: #f7f9fc;
+                --app-navbar-background: rgba(255, 255, 255, 0.97);
+                --app-border: #dce3eb;
+                --app-text: #18212f;
+                --app-muted: #6b7280;
+                --app-primary: #2563eb;
+                --app-primary-hover: #1d4ed8;
+                --app-shadow: 0 5px 22px rgba(15, 23, 42, 0.09);
+            }
+
+            html.dark-mode {
+                --app-background: #0c1521;
+                --app-surface: #172536;
+                --app-surface-secondary: #111d2b;
+                --app-navbar-background: rgba(12, 21, 33, 0.98);
+                --app-border: #2a3c50;
+                --app-text: #edf3fa;
+                --app-muted: #9fb3c8;
+                --app-primary: #4292ff;
+                --app-primary-hover: #69a9ff;
+                --app-shadow: 0 6px 25px rgba(0, 0, 0, 0.32);
+
+                color-scheme: dark;
+            }
+
+            html,
+            body {
+                min-height: 100%;
+            }
+
+            body {
+                margin: 0;
+                background-color: var(--app-background);
+                color: var(--app-text);
+
+                transition:
+                    background-color 0.25s ease,
+                    color 0.25s ease;
+            }
+
+            body {
+                min-height: 100%;
+            }
+
+            body {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                background-color: var(--app-background);
+                color: var(--app-text);
+            }
+
+            .app-main-container {
+                flex: 1 0 auto;
+                width: 100%;
+                padding: 16px;
+            }
+
+            .app-footer {
+                flex-shrink: 0;
+                margin-top: auto;
+                border-top: 1px solid var(--app-border);
+                background-color: var(--app-surface);
+                color: var(--app-muted);
+            }
+
+                .app-footer .container {
+                    padding-top: 15px;
+                    padding-bottom: 15px;
+                }
+
+            /* NAVIGACIJA */
+
+            .app-navbar {
+                min-height: 70px;
+                position: sticky;
+                top: 0;
+                z-index: 1030;
+
+                background-color: var(--app-navbar-background);
+                border-bottom: 1px solid var(--app-border);
+                box-shadow: var(--app-shadow);
+                backdrop-filter: blur(12px);
+
+                transition:
+                    background-color 0.25s ease,
+                    border-color 0.25s ease;
+            }
+
+            .app-navbar-container {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+
+            .app-brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+
+                margin-right: 28px;
+
+                color: var(--app-text) !important;
+                font-size: 1.18rem;
+                font-weight: 800;
+                letter-spacing: -0.02em;
+                text-decoration: none;
+            }
+
+            .app-brand-icon {
+                display: grid;
+                place-items: center;
+
+                width: 40px;
+                height: 40px;
+
+                border-radius: 12px;
+
+                background: linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #60a5fa
+                );
+
+                box-shadow:
+                    0 7px 17px rgba(37, 99, 235, 0.3);
+
+                font-size: 20px;
+            }
+
+            .app-nav-list {
+                gap: 5px;
+            }
+
+            .app-nav-link {
+                position: relative;
+
+                padding: 10px 14px !important;
+                border-radius: 10px;
+
+                color: var(--app-muted) !important;
+                font-weight: 600;
+
+                transition:
+                    color 0.2s ease,
+                    background-color 0.2s ease,
+                    transform 0.2s ease;
+            }
+
+            .app-nav-link:hover {
+                color: var(--app-text) !important;
+                background-color: rgba(37, 99, 235, 0.1);
+                transform: translateY(-1px);
+            }
+
+            .app-nav-link.active {
+                color: var(--app-primary) !important;
+                background-color: rgba(37, 99, 235, 0.14);
+            }
+
+            .app-nav-link.active::after {
+                content: "";
+
+                position: absolute;
+                left: 14px;
+                right: 14px;
+                bottom: 4px;
+
+                height: 2px;
+                border-radius: 999px;
+                background-color: var(--app-primary);
+            }
+
+            /* DARK MODE DUGME */
+
+            .app-theme-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+
+                min-width: 125px;
+                padding: 8px 14px;
+
+                border: 1px solid var(--app-border);
+                border-radius: 999px;
+
+                background-color: var(--app-surface-secondary);
+                color: var(--app-text);
+
+                font-weight: 600;
+
+                transition:
+                    color 0.2s ease,
+                    border-color 0.2s ease,
+                    background-color 0.2s ease;
+            }
+
+            .app-theme-button:hover {
+                color: var(--app-primary);
+                border-color: var(--app-primary);
+                background-color: rgba(37, 99, 235, 0.1);
+            }
+
+            /* KORISNIČKI MENI */
+
+            .app-user-button {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+
+                padding: 6px 11px;
+
+                border: 1px solid transparent;
+                border-radius: 11px;
+
+                background-color: transparent;
+                color: var(--app-text) !important;
+
+                text-decoration: none;
+
+                transition:
+                    background-color 0.2s ease,
+                    border-color 0.2s ease;
+            }
+
+            .app-user-button:hover,
+            .app-user-button:focus {
+                color: var(--app-text) !important;
+                background-color: var(--app-surface-secondary);
+                border-color: var(--app-border);
+            }
+
+            .app-user-avatar {
+                display: grid;
+                place-items: center;
+
+                width: 35px;
+                height: 35px;
+
+                border-radius: 50%;
+
+                background-color: var(--app-primary);
+                color: #ffffff;
+
+                font-size: 14px;
+                font-weight: 800;
+            }
+
+            .app-user-greeting {
+                color: var(--app-muted);
+                font-size: 0.85rem;
+            }
+
+            .app-user-name {
+                display: block;
+                color: var(--app-text);
+                font-size: 0.92rem;
+                line-height: 1.1;
+            }
+
+            .app-dropdown {
+                min-width: 220px;
+
+                border: 1px solid var(--app-border);
+                border-radius: 12px;
+
+                background-color: var(--app-surface);
+                box-shadow: var(--app-shadow);
+
+                overflow: hidden;
+            }
+
+            .app-dropdown .dropdown-item,
+            .app-dropdown .dropdown-item-text {
+                color: var(--app-text);
+            }
+
+            .app-dropdown .dropdown-item:hover {
+                background-color: var(--app-surface-secondary);
+            }
+
+            .app-dropdown .dropdown-divider {
+                border-color: var(--app-border);
+            }
+
+            .app-login-link {
+                color: var(--app-primary) !important;
+                font-weight: 600;
+            }
+
+            /* SADRŽAJ I FOOTER */
+
+            .app-main-container {
+                width: 100%;
+                padding: 16px;
+            }
+
+            .app-footer {
+                margin-top: 30px;
+
+                border-top: 1px solid var(--app-border);
+                background-color: var(--app-surface);
+                color: var(--app-muted);
+            }
+
+            .app-footer .container {
+                padding-top: 15px;
+                padding-bottom: 15px;
+            }
+
+            /* BOOTSTRAP ELEMENTI U DARK MODE-U */
+
+            html.dark-mode .card,
+            html.dark-mode .modal-content,
+            html.dark-mode .list-group-item {
+                color: var(--app-text);
+                background-color: var(--app-surface);
+                border-color: var(--app-border);
+            }
+
+            html.dark-mode .table {
+                --bs-table-color: var(--app-text);
+                --bs-table-bg: var(--app-surface);
+                --bs-table-border-color: var(--app-border);
+                --bs-table-striped-bg: var(--app-surface-secondary);
+                --bs-table-hover-bg: rgba(66, 146, 255, 0.08);
+            }
+
+            html.dark-mode .form-control,
+            html.dark-mode .form-select,
+            html.dark-mode textarea {
+                color: var(--app-text);
+                background-color: var(--app-surface-secondary);
+                border-color: var(--app-border);
+            }
+
+            html.dark-mode .form-control:focus,
+            html.dark-mode .form-select:focus,
+            html.dark-mode textarea:focus {
+                color: var(--app-text);
+                background-color: var(--app-surface-secondary);
+                border-color: var(--app-primary);
+
+                box-shadow:
+                    0 0 0 0.2rem rgba(66, 146, 255, 0.18);
+            }
+
+            html.dark-mode .form-control::placeholder,
+            html.dark-mode textarea::placeholder {
+                color: var(--app-muted);
+            }
+
+            html.dark-mode .text-dark {
+                color: var(--app-text) !important;
+            }
+
+            html.dark-mode .text-muted {
+                color: var(--app-muted) !important;
+            }
+
+            html.dark-mode .bg-white {
+                background-color: var(--app-surface) !important;
+            }
+
+            html.dark-mode .border,
+            html.dark-mode .border-top,
+            html.dark-mode .border-bottom {
+                border-color: var(--app-border) !important;
+            }
+
+            html.dark-mode .navbar-toggler-icon {
+                filter: invert(1);
+            }
+
+            .app-navbar-toggler {
+                border-color: var(--app-border);
+            }
+
+            @@media (max-width: 991.98px) {
+                .app-navbar-container {
+                    padding-left: 16px;
+                    padding-right: 16px;
+                }
+
+                .app-nav-list {
+                    padding-top: 14px;
+                    padding-bottom: 10px;
+                }
+
+                .app-nav-link {
+                    padding: 11px 12px !important;
+                }
+
+                .app-navbar-actions {
+                    align-items: stretch !important;
+                    flex-direction: column;
+
+                    padding-top: 5px;
+                    padding-bottom: 14px;
+                }
+
+                .app-theme-button {
+                    width: 100%;
+                }
+
+                .app-user-button {
+                    justify-content: center;
+                    width: 100%;
+                }
+
+                .app-user-info {
+                    text-align: left;
+                }
+            }
+
+            /* Sve tabele u dark modu */
+
+            html.dark-mode .table {
+                --bs-table-color: var(--app-text);
+                --bs-table-bg: var(--app-surface);
+                --bs-table-border-color: var(--app-border);
+                --bs-table-striped-color: var(--app-text);
+                --bs-table-striped-bg: var(--app-surface-secondary);
+                --bs-table-hover-color: #ffffff;
+                --bs-table-hover-bg: #223144;
+                color: var(--app-text) !important;
+                background-color: var(--app-surface) !important;
+            }
+
+                /* Direktno postavljanje boje svake ćelije */
+
+                html.dark-mode .table > thead > tr > th,
+                html.dark-mode .table > tbody > tr > th,
+                html.dark-mode .table > tbody > tr > td,
+                html.dark-mode .table > tfoot > tr > th,
+                html.dark-mode .table > tfoot > tr > td {
+                    color: var(--app-text) !important;
+                    background-color: var(--app-surface) !important;
+                    border-color: var(--app-border) !important;
+                }
+
+                /* Zaglavlje tabele */
+
+                html.dark-mode .table thead th {
+                    color: #a9bdd2 !important;
+                    background-color: #142235 !important;
+                }
+
+            /* Hover reda */
+
+            html.dark-mode .table-hover > tbody > tr:hover > * {
+                color: #ffffff !important;
+                background-color: #223144 !important;
+            }
+
+            /* Tekst unutar ćelija */
+
+            html.dark-mode .table td span:not(.badge),
+            html.dark-mode .table td div,
+            html.dark-mode .table td strong,
+            html.dark-mode .table td small,
+            html.dark-mode .table td p {
+                color: inherit;
+            }
+
+            /* Sekundarni tekst u tabelama */
+
+            html.dark-mode .table .text-muted,
+            html.dark-mode .dashboard-table .text-muted {
+                color: #9fb3c8 !important;
+            }
+
+            /* Linkovi u tabelama koji nisu Bootstrap dugmad */
+
+            html.dark-mode .table a:not(.btn) {
+                color: #69a9ff;
+            }
+
+                html.dark-mode .table a:not(.btn):hover {
+                    color: #91c2ff;
+                }
+
+            /* Opšti naslovi i tekst stranica */
+
+            html.dark-mode main h1,
+            html.dark-mode main h2,
+            html.dark-mode main h3,
+            html.dark-mode main h4,
+            html.dark-mode main h5,
+            html.dark-mode main h6,
+            html.dark-mode main label,
+            html.dark-mode main p {
+                color: var(--app-text);
+            }
+
+            /* Kartice */
+
+            html.dark-mode .card-body,
+            html.dark-mode .card-header,
+            html.dark-mode .card-footer {
+                color: var(--app-text);
+            }
+
+            /* Posebno za tabelu Poslednji ugovori */
+
+            html.dark-mode .dashboard-page .dashboard-table tbody td {
+                color: #edf3fa !important;
+                background-color: #18293c !important;
+            }
+
+            html.dark-mode .dashboard-page .dashboard-table thead th {
+                color: #9fc5ee !important;
+                background-color: #18293c !important;
+            }
+
+            html.dark-mode .dashboard-page .dashboard-table tbody tr:hover td {
+                color: #ffffff !important;
+                background-color: #223a52 !important;
+            }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg app-navbar">
+
+            <div class="container-fluid app-navbar-container">
+
+                <a class="navbar-brand app-brand"
+                   asp-controller="Pocetna"
+                   asp-action="Index">
+
+                    <span class="app-brand-icon">
+                        🚗
+                    </span>
+
+                    <span>
+                        Rent a Car
+                    </span>
+                </a>
+
+                <button class="navbar-toggler app-navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#glavnaNavigacija"
+                        aria-controls="glavnaNavigacija"
+                        aria-expanded="false"
+                        aria-label="Prikaži navigaciju">
+
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse"
+                     id="glavnaNavigacija">
+
+                    <ul class="navbar-nav me-auto app-nav-list">
+
+                        @if (administratorPrijavljen)
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link app-nav-link
+                                    @(trenutniKontroler == "Pocetna"
+                                       ? "active"
+                                       : "")"
+                                   asp-controller="Pocetna"
+                                   asp-action="Index">
+
+                                    Početna
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link app-nav-link
+                                    @(trenutniKontroler == "Vozila"
+                                       ? "active"
+                                       : "")"
+                                   asp-controller="Vozila"
+                                   asp-action="Index">
+
+                                    Vozila
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link app-nav-link
+                                    @(trenutniKontroler == "Klijenti"
+                                       ? "active"
+                                       : "")"
+                                   asp-controller="Klijenti"
+                                   asp-action="Index">
+
+                                    Klijenti
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link app-nav-link
+                                    @(trenutniKontroler == "Ugovori"
+                                       ? "active"
+                                       : "")"
+                                   asp-controller="Ugovori"
+                                   asp-action="Index">
+
+                                    Ugovori
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3 app-navbar-actions">
+
+                        @if (administratorPrijavljen)
+                        {
+                            <button type="button"
+                                    id="globalThemeToggle"
+                                    class="btn app-theme-button"
+                                    aria-label="Promeni temu">
+
+                                <span id="globalThemeIcon">
+                                    🌙
+                                </span>
+
+                                <span id="globalThemeText">
+                                    Dark mode
+                                </span>
+                            </button>
+
+                            <div class="dropdown">
+
+                                <a class="app-user-button dropdown-toggle"
+                                   href="#"
+                                   id="korisnikDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <span class="app-user-avatar">
+                                        @(string.IsNullOrWhiteSpace(imePrezime)
+                                            ? "A"
+                                            : imePrezime.Substring(0, 1).ToUpper())
+                                    </span>
+
+                                    <span class="app-user-info d-none d-md-block">
+
+                                        <span class="app-user-greeting">
+                                            Zdravo,
+                                        </span>
+
+                                        <strong class="app-user-name">
+                                            @imePrezime
+                                        </strong>
+                                    </span>
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end app-dropdown"
+                                    aria-labelledby="korisnikDropdown">
+
+                                    <li>
+                                        <span class="dropdown-item-text">
+
+                                            Uloga:
+
+                                            <strong>
+                                                @uloga
+                                            </strong>
+                                        </span>
+                                    </li>
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+                                    <li>
+                                        @* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-controller="Autentikacija"
+                                              asp-action="Odjava"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="dropdown-item text-danger">
+
+                                                Odjava
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="nav-link app-login-link"
+                               asp-controller="Autentikacija"
+                               asp-action="Login">
+
+                                Prijava
+                            </a>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid app-main-container">
+
+        <main role="main"
+              class="pb-3">
+
+            @RenderBody()
+
+        </main>
+    </div>
+
+    <footer class="app-footer">
+
+        <div class="container">
+
+            &copy; 2026 - Rent a Car
+
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    <script>
+        document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+        const dugme =
+        document.getElementById(
+        "globalThemeToggle"
+        );
+
+        const ikonica =
+        document.getElementById(
+        "globalThemeIcon"
+        );
+
+        const tekst =
+        document.getElementById(
+        "globalThemeText"
+        );
+
+        function osveziDugme() {
+        const darkMode =
+        document.documentElement
+        .classList
+        .contains("dark-mode");
+
+        if (ikonica) {
+        ikonica.textContent =
+        darkMode ? "☀️" : "🌙";
+        }
+
+        if (tekst) {
+        tekst.textContent =
+        darkMode
+        ? "Light mode"
+        : "Dark mode";
+        }
+        }
+
+        function promeniTemu() {
+        const darkMode =
+        document.documentElement
+        .classList
+        .toggle("dark-mode");
+
+        localStorage.setItem(
+        "rentacar-tema",
+        darkMode
+        ? "dark"
+        : "light"
+        );
+
+        osveziDugme();
+
+        document.dispatchEvent(
+        new CustomEvent(
+        "rentacar-tema-promena",
+        {
+        detail: {
+        darkMode: darkMode
+        }
+        }
+        )
+        );
+        }
+
+        if (dugme) {
+        dugme.addEventListener(
+        "click",
+        promeniTemu
+        );
+        }
+
+        osveziDugme();
+        }
+        );
+    </script>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
+</body>
+</html>

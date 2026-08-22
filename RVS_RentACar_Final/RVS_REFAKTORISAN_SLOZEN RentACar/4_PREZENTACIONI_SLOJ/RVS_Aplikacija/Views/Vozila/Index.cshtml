@@ -1,0 +1,23 @@
+@model IEnumerable<RVS_Aplikacija.ViewModels.VoziloViewModel>
+@{
+    string? izabraniStatus = ViewBag.IzabraniStatus as string;
+    ViewData["Title"] = "Vozila";
+}
+@if (TempData["Uspeh"] != null) { <div class="alert alert-success">@TempData["Uspeh"]</div> }
+@if (TempData["Greska"] != null) { <div class="alert alert-danger">@TempData["Greska"]</div> }
+@if (ViewBag.Greska != null) { <div class="alert alert-danger">@ViewBag.Greska</div> }
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="mb-0">Vozila</h1><a asp-action="Dodaj" class="btn btn-primary">Dodaj novo vozilo</a></div>
+<div class="d-flex flex-wrap gap-2 mb-4">
+<a asp-action="Index" class="btn @(string.IsNullOrWhiteSpace(izabraniStatus) ? "btn-primary" : "btn-outline-primary")">Sva vozila</a>
+<a asp-action="Index" asp-route-status="Slobodno" class="btn @(izabraniStatus == "Slobodno" ? "btn-success" : "btn-outline-success")">Slobodna</a>
+<a asp-action="Index" asp-route-status="Zauzeto" class="btn @(izabraniStatus == "Zauzeto" ? "btn-danger" : "btn-outline-danger")">Zauzeta</a>
+<a asp-action="Index" asp-route-status="Servis" class="btn @(izabraniStatus == "Servis" ? "btn-warning" : "btn-outline-warning")">Servis</a>
+</div>
+<div class="table-responsive">@* Tabela prikazuje kolekciju podataka koju je kontroler pripremio u ViewModel-u. *@
+<table class="table table-striped table-bordered align-middle"><thead><tr><th>Slika</th><th>Vozilo</th><th>Registracija</th><th>Godište</th><th>Gorivo</th><th>Kilometraža</th><th>Cena/dan</th><th>Status</th><th>Akcije</th></tr></thead><tbody>
+@foreach (var vozilo in Model)
+{
+<tr><td style="width:110px">@if (!string.IsNullOrWhiteSpace(vozilo.SlikaPutanja)) { <img src="@vozilo.SlikaPutanja" alt="@vozilo.Marka @vozilo.Model" class="rounded border" style="width:90px;height:60px;object-fit:cover" /> } else { <span class="text-muted">Bez slike</span> }</td>
+<td><strong>@vozilo.Marka @vozilo.Model</strong></td><td>@vozilo.Registracija</td><td>@(vozilo.Godiste?.ToString() ?? "-")</td><td>@(vozilo.Gorivo ?? "-")</td><td>@(vozilo.Kilometraza.HasValue ? vozilo.Kilometraza.Value.ToString("N0") + " km" : "-")</td><td>@vozilo.CenaPoDanu.ToString("N2") RSD</td><td>@vozilo.StatusVozila</td><td class="text-nowrap"><a asp-action="Detalji" asp-route-id="@vozilo.Id" class="btn btn-sm btn-info">Detalji</a> <a asp-action="Izmeni" asp-route-id="@vozilo.Id" class="btn btn-sm btn-warning">Izmeni</a> <a asp-action="Obrisi" asp-route-id="@vozilo.Id" class="btn btn-sm btn-danger">Obriši</a></td></tr>
+}
+</tbody></table></div>

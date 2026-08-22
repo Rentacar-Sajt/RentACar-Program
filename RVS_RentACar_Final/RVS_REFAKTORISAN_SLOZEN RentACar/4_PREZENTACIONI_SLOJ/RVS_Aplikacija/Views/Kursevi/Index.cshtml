@@ -1,0 +1,108 @@
+@model List<BibliotekaKlasa.KlasePodataka.Modeli.KursModel>
+
+@{
+    ViewData["Title"] = "Курсеви";
+}
+
+<h2>Курсеви</h2>
+
+@if (TempData["Poruka"] != null)
+{
+    var tip = TempData["PorukaTip"]?.ToString() ?? "uspeh";
+    var cssClass = tip switch
+    {
+        "uspeh" => "alert-success",
+        "greska" => "alert-danger",
+        _ => "alert-info"
+    };
+
+    <div class="alert @cssClass">
+        @TempData["Poruka"]
+    </div>
+}
+
+@* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form method="get" asp-action="Index" class="mb-3 d-flex flex-wrap gap-2">
+    <div class="input-group" style="max-width: 300px;">
+        <input type="text" name="filter" class="form-control"
+               placeholder="Pretraži kurseve..."
+               value="@(ViewData["Filter"] ?? "")" />
+        <button type="submit" class="btn btn-secondary">Pretraži</button>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-primary">Prikaži sve</a>
+</form>
+
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a class="btn btn-primary" asp-action="Dodaj">Додај нови курс</a>
+    </p>
+}
+
+<div class="table-responsive">
+    @* Tabela prikazuje kolekciju podataka koju je kontroler pripremio u ViewModel-u. *@
+<table class="table table-bordered table-striped table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ИД</th>
+                <th>Назив курса</th>
+                <th>Опис курса</th>
+                <th>Аутор (емаил)</th>
+                <th>Акције</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model == null || Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-center">
+                        Нема курсева за приказ.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var kursObjekat in Model)
+                {
+                    <tr>
+                        <td>@kursObjekat.Id</td>
+                        <td>@kursObjekat.NazivKursa</td>
+                        <td>@kursObjekat.OpisKursa</td>
+                        <td>@kursObjekat.KorisnikObjekat?.Email</td>
+
+                        <td class="d-flex flex-wrap gap-1">
+
+                            <a class="btn btn-sm btn-primary"
+                               asp-action="MasterDetail"
+                               asp-route-id="@kursObjekat.Id">
+                                прикажи више
+                            </a>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="btn btn-sm btn-warning"
+                                   asp-action="Izmeni"
+                                   asp-route-id="@kursObjekat.Id">
+                                    Измени
+                                </a>
+
+                                <form asp-action="Obrisi"
+                                      asp-route-id="@kursObjekat.Id"
+                                      method="post"
+                                      onsubmit="return confirm('Да ли сте сигурни да желите да обришете овај курс?');">
+
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Обриши
+                                    </button>
+
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

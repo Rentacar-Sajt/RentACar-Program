@@ -1,0 +1,36 @@
+@model RVS_Aplikacija.ViewModels.PrijavaViewModel
+@{
+    ViewData["Title"] = "Пријава";
+}
+
+<h2 class="text-center">Prijava</h2>
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        @* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-action="Prijava" method="post">
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="Unesite email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Lozinka" class="form-label"></label>
+                <input asp-for="Lozinka" type="password" class="form-control" placeholder="Unesite lozinku" />
+                <span asp-validation-for="Lozinka" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Prijavi se</button>
+
+            <div class="mt-2 text-center">
+                <a asp-action="ZaboravljenaLozinka">Zaboravljena lozinka?</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@* Scripts sekcija se renderuje na dnu layout-a; ovde su validacija i dinamičko ponašanje forme. *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
