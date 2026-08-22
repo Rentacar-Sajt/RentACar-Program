@@ -1,0 +1,810 @@
+-- ============================================================================
+-- OBJAŠNJENJE ZA ODBRANU PROJEKTA
+-- Ovaj fajl pripada sloju podataka i sadrži SQL definicije koje izvršava SQL Server.
+-- Stored procedure centralizuje složenije operacije u bazi i omogućava da C# kod
+-- prosledi parametre bez sastavljanja SQL naredbi iz korisničkog unosa.
+-- Transakcije se koriste tamo gde više izmena mora uspeti ili pasti kao jedna celina.
+-- ============================================================================
+
+USE RentACar;
+GO
+
+
+/* =========================================================
+   VIEW-OVI
+   ========================================================= */
+
+CREATE OR ALTER VIEW vwSvaVozila
+AS
+SELECT
+    Id,
+    Marka,
+    Model,
+    Registracija,
+    CenaPoDanu,
+    StatusVozila
+FROM Vozila;
+GO
+
+CREATE OR ALTER VIEW vwSviKlijenti
+AS
+SELECT
+    Id,
+    Ime,
+    Prezime,
+    JMBG,
+    BrojPasosa,
+    BrojVozackeDozvole,
+    DatumIzdavanjaDozvole,
+    Telefon,
+    Email,
+    Adresa
+FROM Klijenti;
+GO
+
+CREATE OR ALTER VIEW vwSviUgovori
+AS
+SELECT
+    u.Id,
+    u.BrojUgovora,
+    u.DatumIzdavanja,
+    u.DatumPreuzimanja,
+    u.DatumVracanja,
+    u.StvarniDatumVracanja,
+    u.BrojDanaKasnjenja,
+    u.KaznaZaKasnjenje,
+    u.MestoPreuzimanja,
+    u.MestoVracanja,
+    u.NacinPlacanja,
+    u.Depozit,
+    u.StatusUgovora,
+    u.Napomena,
+    u.PopustProcenat,
+    u.UkupnoZaPlacanje,
+    u.IzabraneDodatneUsluge,
+    u.KlijentId,
+    k.Ime + N' ' + k.Prezime AS Klijent,
+    u.KorisnikId,
+    kor.Ime + N' ' + kor.Prezime AS Zaposleni
+FROM Ugovori u
+INNER JOIN Klijenti k
+    ON k.Id = u.KlijentId
+INNER JOIN Korisnici kor
+    ON kor.Id = u.KorisnikId;
+GO
+
+CREATE OR ALTER VIEW vwStavkeUgovora
+AS
+SELECT
+    su.Id,
+    su.UgovorId,
+    su.VoziloId,
+    v.Marka,
+    v.Model,
+    v.Registracija,
+    su.BrojDana,
+    su.CenaPoDanu,
+    su.PopustProcenat,
+    su.Ukupno
+FROM StavkeUgovora su
+INNER JOIN Vozila v ON v.Id = su.VoziloId;
+GO
+
+
+/* =========================================================
+   VOZILA - CRUD PREKO STORED PROCEDURE
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE spDajSvaVozila AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT Id, Marka, Model, Registracija, CenaPoDanu, StatusVozila,
+           Godiste, Gorivo, Menjac, Kilometraza, Boja, BrojSedista,
+           ZapreminaMotora, SnagaMotora, SlikaPutanja
+    FROM Vozila ORDER BY Marka, Model;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spDajVoziloPoId @Id INT AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT Id, Marka, Model, Registracija, CenaPoDanu, StatusVozila,
+           Godiste, Gorivo, Menjac, Kilometraza, Boja, BrojSedista,
+           ZapreminaMotora, SnagaMotora, SlikaPutanja
+    FROM Vozila WHERE Id = @Id;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spDajVozilaPoRegistraciji @Registracija NVARCHAR(20) AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT Id, Marka, Model, Registracija, CenaPoDanu, StatusVozila,
+           Godiste, Gorivo, Menjac, Kilometraza, Boja, BrojSedista,
+           ZapreminaMotora, SnagaMotora, SlikaPutanja
+    FROM Vozila WHERE Registracija LIKE N'%' + @Registracija + N'%'
+    ORDER BY Registracija;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spDodajVozilo
+    @Marka NVARCHAR(50), @Model NVARCHAR(50), @Registracija NVARCHAR(20),
+    @CenaPoDanu DECIMAL(10,2), @StatusVozila NVARCHAR(30), @Godiste INT = NULL,
+    @Gorivo NVARCHAR(30) = NULL, @Menjac NVARCHAR(30) = NULL,
+    @Kilometraza INT = NULL, @Boja NVARCHAR(30) = NULL, @BrojSedista INT = NULL,
+    @ZapreminaMotora DECIMAL(6,2) = NULL, @SnagaMotora INT = NULL,
+    @SlikaPutanja NVARCHAR(300) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Vozila (Marka, Model, Registracija, CenaPoDanu, StatusVozila,
+        Godiste, Gorivo, Menjac, Kilometraza, Boja, BrojSedista,
+        ZapreminaMotora, SnagaMotora, SlikaPutanja)
+    VALUES (@Marka, @Model, @Registracija, @CenaPoDanu, @StatusVozila,
+        @Godiste, @Gorivo, @Menjac, @Kilometraza, @Boja, @BrojSedista,
+        @ZapreminaMotora, @SnagaMotora, @SlikaPutanja);
+    SELECT CAST(SCOPE_IDENTITY() AS INT) AS NoviId;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spIzmeniVozilo
+    @Id INT, @Marka NVARCHAR(50), @Model NVARCHAR(50), @Registracija NVARCHAR(20),
+    @CenaPoDanu DECIMAL(10,2), @StatusVozila NVARCHAR(30), @Godiste INT = NULL,
+    @Gorivo NVARCHAR(30) = NULL, @Menjac NVARCHAR(30) = NULL,
+    @Kilometraza INT = NULL, @Boja NVARCHAR(30) = NULL, @BrojSedista INT = NULL,
+    @ZapreminaMotora DECIMAL(6,2) = NULL, @SnagaMotora INT = NULL,
+    @SlikaPutanja NVARCHAR(300) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE Vozila SET Marka=@Marka, Model=@Model, Registracija=@Registracija,
+        CenaPoDanu=@CenaPoDanu, StatusVozila=@StatusVozila, Godiste=@Godiste,
+        Gorivo=@Gorivo, Menjac=@Menjac, Kilometraza=@Kilometraza, Boja=@Boja,
+        BrojSedista=@BrojSedista, ZapreminaMotora=@ZapreminaMotora,
+        SnagaMotora=@SnagaMotora, SlikaPutanja=@SlikaPutanja
+    WHERE Id=@Id;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spObrisiVozilo @Id INT AS
+BEGIN
+    SET NOCOUNT ON;
+    IF EXISTS (SELECT 1 FROM StavkeUgovora WHERE VoziloId = @Id)
+        THROW 50001, N'Vozilo se ne može obrisati jer se nalazi u stavkama ugovora.', 1;
+    DELETE FROM Vozila WHERE Id = @Id;
+END;
+GO
+
+
+/* =========================================================
+   KLIJENTI - CRUD
+   ========================================================= */
+
+USE RentACar;
+GO
+
+CREATE OR ALTER PROCEDURE spDajSveKlijente
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Ime,
+        Prezime,
+        JMBG,
+        BrojPasosa,
+        BrojVozackeDozvole,
+        DatumIzdavanjaDozvole,
+        DatumIstekaVozackeDozvole,
+        Telefon,
+        Email,
+        Adresa
+    FROM Klijenti
+    ORDER BY Prezime, Ime;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spDajKlijentaPoId
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Ime,
+        Prezime,
+        JMBG,
+        BrojPasosa,
+        BrojVozackeDozvole,
+        DatumIzdavanjaDozvole,
+        DatumIstekaVozackeDozvole,
+        Telefon,
+        Email,
+        Adresa
+    FROM Klijenti
+    WHERE Id = @Id;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spFiltrirajKlijente
+    @Tekst NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Ime,
+        Prezime,
+        JMBG,
+        BrojPasosa,
+        BrojVozackeDozvole,
+        DatumIzdavanjaDozvole,
+        DatumIstekaVozackeDozvole,
+        Telefon,
+        Email,
+        Adresa
+    FROM Klijenti
+    WHERE
+        Ime LIKE '%' + @Tekst + '%'
+        OR Prezime LIKE '%' + @Tekst + '%'
+        OR JMBG LIKE '%' + @Tekst + '%'
+        OR BrojPasosa LIKE '%' + @Tekst + '%'
+        OR BrojVozackeDozvole LIKE '%' + @Tekst + '%'
+        OR Telefon LIKE '%' + @Tekst + '%'
+        OR Email LIKE '%' + @Tekst + '%'
+    ORDER BY Prezime, Ime;
+END;
+GO
+
+    CREATE OR ALTER PROCEDURE spDodajKlijenta
+        @Ime NVARCHAR(50),
+        @Prezime NVARCHAR(50),
+        @JMBG NVARCHAR(13) = NULL,
+        @BrojPasosa NVARCHAR(30) = NULL,
+        @BrojVozackeDozvole NVARCHAR(30),
+        @DatumIzdavanjaDozvole DATE,
+        @DatumIstekaVozackeDozvole DATE = NULL,
+        @Telefon NVARCHAR(30),
+        @Email NVARCHAR(128) = NULL,
+        @Adresa NVARCHAR(150)
+    AS
+    BEGIN
+        SET NOCOUNT ON;
+
+        INSERT INTO Klijenti
+        (
+            Ime,
+            Prezime,
+            JMBG,
+            BrojPasosa,
+            BrojVozackeDozvole,
+            DatumIzdavanjaDozvole,
+            DatumIstekaVozackeDozvole,
+            Telefon,
+            Email,
+            Adresa
+        )
+        VALUES
+        (
+            @Ime,
+            @Prezime,
+            @JMBG,
+            @BrojPasosa,
+            @BrojVozackeDozvole,
+            @DatumIzdavanjaDozvole,
+            @DatumIstekaVozackeDozvole,
+            @Telefon,
+            @Email,
+            @Adresa
+        );
+
+        SELECT CAST(SCOPE_IDENTITY() AS INT);
+    END;
+    GO
+
+    CREATE OR ALTER PROCEDURE spIzmeniKlijenta
+        @Id INT,
+        @Ime NVARCHAR(50),
+        @Prezime NVARCHAR(50),
+        @JMBG NVARCHAR(13) = NULL,
+        @BrojPasosa NVARCHAR(30) = NULL,
+        @BrojVozackeDozvole NVARCHAR(30),
+        @DatumIzdavanjaDozvole DATE,
+        @DatumIstekaVozackeDozvole DATE = NULL,
+        @Telefon NVARCHAR(30),
+        @Email NVARCHAR(128) = NULL,
+        @Adresa NVARCHAR(150)
+    AS
+    BEGIN
+        SET NOCOUNT OFF;
+
+        UPDATE Klijenti
+        SET
+            Ime = @Ime,
+            Prezime = @Prezime,
+            JMBG = @JMBG,
+            BrojPasosa = @BrojPasosa,
+            BrojVozackeDozvole = @BrojVozackeDozvole,
+            DatumIzdavanjaDozvole = @DatumIzdavanjaDozvole,
+            DatumIstekaVozackeDozvole = @DatumIstekaVozackeDozvole,
+            Telefon = @Telefon,
+            Email = @Email,
+            Adresa = @Adresa
+        WHERE Id = @Id;
+    END;
+    GO
+
+CREATE OR ALTER PROCEDURE spObrisiKlijenta
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Ugovori WHERE KlijentId = @Id)
+    BEGIN
+        THROW 50002, N'Klijent se ne može obrisati jer ima evidentirane ugovore.', 1;
+    END;
+
+    DELETE FROM Klijenti
+    WHERE Id = @Id;
+END;
+GO
+
+
+/* =========================================================
+   UGOVORI - PRIKAZ, FILTRIRANJE I BRISANJE
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE spDajSveUgovore
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM vwSviUgovori
+    ORDER BY DatumIzdavanja DESC, Id DESC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spDajUgovorPoId
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM vwSviUgovori
+    WHERE Id = @Id;
+
+    SELECT *
+    FROM vwStavkeUgovora
+    WHERE UgovorId = @Id
+    ORDER BY Id;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spFiltrirajUgovore
+    @BrojUgovora NVARCHAR(20) = NULL,
+    @Klijent NVARCHAR(100) = NULL,
+    @StatusUgovora NVARCHAR(30) = NULL,
+    @DatumOd DATE = NULL,
+    @DatumDo DATE = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM vwSviUgovori
+    WHERE
+        (@BrojUgovora IS NULL OR BrojUgovora LIKE N'%' + @BrojUgovora + N'%')
+        AND (@Klijent IS NULL OR Klijent LIKE N'%' + @Klijent + N'%')
+        AND (@StatusUgovora IS NULL OR StatusUgovora = @StatusUgovora)
+        AND (@DatumOd IS NULL OR DatumIzdavanja >= @DatumOd)
+        AND (@DatumDo IS NULL OR DatumIzdavanja <= @DatumDo)
+    ORDER BY DatumIzdavanja DESC, Id DESC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spObrisiUgovor
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM Ugovori
+            WHERE Id = @Id
+        )
+        BEGIN
+            THROW 50020,
+                N'Ugovor nije pronađen.',
+                1;
+        END;
+
+        UPDATE v
+        SET v.StatusVozila = N'Slobodno'
+        FROM Vozila v
+        INNER JOIN StavkeUgovora su
+            ON su.VoziloId = v.Id
+        WHERE su.UgovorId = @Id
+          AND v.StatusVozila <> N'Servis';
+
+        DELETE FROM StavkeUgovora
+        WHERE UgovorId = @Id;
+
+        DELETE FROM Ugovori
+        WHERE Id = @Id;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        THROW;
+    END CATCH;
+END;
+GO
+
+
+/* =========================================================
+   MASTER-DETAIL UNOS UGOVORA SA STAVKAMA U TRANSAKCIJI
+   Napomena:
+   Koristi table-valued parametar StavkaUgovoraTip.
+   ========================================================= */
+
+IF TYPE_ID(N'dbo.StavkaUgovoraTip') IS NULL
+BEGIN
+    EXEC(N'
+        CREATE TYPE dbo.StavkaUgovoraTip AS TABLE
+        (
+            VoziloId INT NOT NULL,
+            BrojDana INT NOT NULL,
+            CenaPoDanu DECIMAL(10,2) NOT NULL,
+            PopustProcenat DECIMAL(5,2) NOT NULL,
+            Ukupno DECIMAL(12,2) NOT NULL
+        );
+    ');
+END;
+GO
+
+CREATE OR ALTER PROCEDURE spDodajUgovorSaStavkama
+    @BrojUgovora NVARCHAR(20),
+    @DatumIzdavanja DATE,
+    @DatumPreuzimanja DATETIME2,
+    @DatumVracanja DATETIME2,
+    @MestoPreuzimanja NVARCHAR(100),
+    @MestoVracanja NVARCHAR(100),
+    @NacinPlacanja NVARCHAR(30),
+    @Depozit DECIMAL(10,2),
+    @StatusUgovora NVARCHAR(30),
+    @Napomena NVARCHAR(500) = NULL,
+    @PopustProcenat DECIMAL(5,2),
+    @UkupnoZaPlacanje DECIMAL(12,2),
+    @KlijentId INT,
+    @KorisnikId INT,
+    @IzabraneDodatneUsluge NVARCHAR(100) = NULL,
+    @Stavke dbo.StavkaUgovoraTip READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM @Stavke
+        )
+        BEGIN
+            THROW 50003,
+                N'Ugovor mora imati najmanje jednu stavku.',
+                1;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM @Stavke s
+            INNER JOIN Vozila v
+                ON v.Id = s.VoziloId
+            WHERE v.StatusVozila <> N'Slobodno'
+        )
+        BEGIN
+            THROW 50004,
+                N'Jedno ili više izabranih vozila nije slobodno.',
+                1;
+        END;
+
+        INSERT INTO Ugovori
+        (
+            BrojUgovora,
+            DatumIzdavanja,
+            DatumPreuzimanja,
+            DatumVracanja,
+            MestoPreuzimanja,
+            MestoVracanja,
+            NacinPlacanja,
+            Depozit,
+            StatusUgovora,
+            Napomena,
+            PopustProcenat,
+            UkupnoZaPlacanje,
+            KlijentId,
+            KorisnikId,
+            IzabraneDodatneUsluge
+        )
+        VALUES
+        (
+            @BrojUgovora,
+            @DatumIzdavanja,
+            @DatumPreuzimanja,
+            @DatumVracanja,
+            @MestoPreuzimanja,
+            @MestoVracanja,
+            @NacinPlacanja,
+            @Depozit,
+            @StatusUgovora,
+            @Napomena,
+            @PopustProcenat,
+            @UkupnoZaPlacanje,
+            @KlijentId,
+            @KorisnikId,
+            @IzabraneDodatneUsluge
+        );
+
+        DECLARE @NoviUgovorId INT =
+            CAST(SCOPE_IDENTITY() AS INT);
+
+        INSERT INTO StavkeUgovora
+        (
+            UgovorId,
+            VoziloId,
+            BrojDana,
+            CenaPoDanu,
+            PopustProcenat,
+            Ukupno
+        )
+        SELECT
+            @NoviUgovorId,
+            VoziloId,
+            BrojDana,
+            CenaPoDanu,
+            PopustProcenat,
+            Ukupno
+        FROM @Stavke;
+
+        UPDATE v
+        SET v.StatusVozila = N'Iznajmljeno'
+        FROM Vozila v
+        INNER JOIN @Stavke s
+            ON s.VoziloId = v.Id;
+
+        COMMIT TRANSACTION;
+
+        SELECT @NoviUgovorId AS NoviUgovorId;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        THROW;
+    END CATCH;
+END;
+GO
+
+CREATE TABLE DodatneUsluge
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Naziv NVARCHAR(100) NOT NULL UNIQUE,
+    PodrazumevanaCenaPoDanu DECIMAL(10,2) NOT NULL DEFAULT 0,
+    Aktivna BIT NOT NULL DEFAULT 1
+);
+GO
+
+CREATE TABLE DodatneUslugeUgovora
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UgovorId INT NOT NULL,
+    DodatnaUslugaId INT NOT NULL,
+    NazivUsluge NVARCHAR(100) NOT NULL,
+    CenaPoDanu DECIMAL(10,2) NOT NULL,
+    BrojDana INT NOT NULL,
+    Ukupno DECIMAL(12,2) NOT NULL,
+
+    CONSTRAINT FK_DodatneUslugeUgovora_Ugovori
+        FOREIGN KEY (UgovorId)
+        REFERENCES Ugovori(Id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_DodatneUslugeUgovora_DodatneUsluge
+        FOREIGN KEY (DodatnaUslugaId)
+        REFERENCES DodatneUsluge(Id)
+);
+GO
+
+INSERT INTO DodatneUsluge
+(
+    Naziv,
+    PodrazumevanaCenaPoDanu,
+    Aktivna
+)
+VALUES
+(N'GPS navigacija', 300, 1),
+(N'Dečije sedište', 400, 1),
+(N'Full osiguranje', 1500, 1),
+(N'Dodatni vozač', 700, 1),
+(N'Ostalo', 0, 1);
+GO
+
+ALTER TABLE Ugovori
+ADD IzabraneDodatneUsluge NVARCHAR(100) NULL;
+GO
+
+
+/* =========================================================
+   IZMENA STATUSA UGOVORA I VOZILA
+   ========================================================= */
+
+CREATE OR ALTER PROCEDURE spPromeniStatusUgovora
+    @UgovorId INT,
+    @NoviStatus NVARCHAR(30),
+    @StvarniDatumVracanja DATETIME2 = NULL,
+    @BrojDanaKasnjenja INT = 0,
+    @KaznaZaKasnjenje DECIMAL(12,2) = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM Ugovori
+            WHERE Id = @UgovorId
+        )
+        BEGIN
+            THROW 50010, N'Ugovor nije pronađen.', 1;
+        END;
+
+        IF @NoviStatus NOT IN
+        (
+            N'Aktivan',
+            N'Završen',
+            N'Otkazan'
+        )
+        BEGIN
+            THROW 50011, N'Neispravan status ugovora.', 1;
+        END;
+
+        IF @NoviStatus = N'Završen'
+           AND @StvarniDatumVracanja IS NULL
+        BEGIN
+            THROW 50013,
+                N'Stvarni datum vraćanja je obavezan kada se ugovor završava.',
+                1;
+        END;
+
+        DECLARE @TrenutniStatus NVARCHAR(30);
+
+        SELECT @TrenutniStatus = StatusUgovora
+        FROM Ugovori
+        WHERE Id = @UgovorId;
+
+        IF @NoviStatus = N'Aktivan'
+           AND @TrenutniStatus <> N'Aktivan'
+           AND EXISTS
+           (
+               SELECT 1
+               FROM StavkeUgovora su
+               INNER JOIN Vozila v
+                   ON v.Id = su.VoziloId
+               WHERE su.UgovorId = @UgovorId
+                 AND v.StatusVozila <> N'Slobodno'
+           )
+        BEGIN
+            THROW 50012,
+                N'Ugovor nije moguće aktivirati jer vozilo nije slobodno.',
+                1;
+        END;
+
+        UPDATE Ugovori
+        SET
+            StatusUgovora = @NoviStatus,
+            StvarniDatumVracanja =
+                CASE
+                    WHEN @NoviStatus = N'Završen'
+                        THEN @StvarniDatumVracanja
+                    ELSE StvarniDatumVracanja
+                END,
+            BrojDanaKasnjenja =
+                CASE
+                    WHEN @NoviStatus = N'Završen'
+                        THEN ISNULL(@BrojDanaKasnjenja, 0)
+                    ELSE BrojDanaKasnjenja
+                END,
+            KaznaZaKasnjenje =
+                CASE
+                    WHEN @NoviStatus = N'Završen'
+                        THEN ISNULL(@KaznaZaKasnjenje, 0)
+                    ELSE KaznaZaKasnjenje
+                END
+        WHERE Id = @UgovorId;
+
+        IF @NoviStatus = N'Aktivan'
+        BEGIN
+            UPDATE v
+            SET v.StatusVozila = N'Iznajmljeno'
+            FROM Vozila v
+            INNER JOIN StavkeUgovora su
+                ON su.VoziloId = v.Id
+            WHERE su.UgovorId = @UgovorId;
+        END
+        ELSE IF @NoviStatus IN (N'Završen', N'Otkazan')
+        BEGIN
+            UPDATE v
+            SET v.StatusVozila = N'Slobodno'
+            FROM Vozila v
+            INNER JOIN StavkeUgovora su
+                ON su.VoziloId = v.Id
+            WHERE su.UgovorId = @UgovorId
+              AND v.StatusVozila <> N'Servis';
+        END;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        THROW;
+    END CATCH;
+END;
+GO
+
+EXEC sp_helptext 'spDodajUgovorSaStavkama';
+
+SELECT definition
+FROM sys.check_constraints
+WHERE name = 'CK_Vozila_Status';
+
+SELECT
+    OBJECT_NAME(object_id) AS Procedura
+FROM sys.sql_modules
+WHERE definition LIKE '%Iznajmljeno%';
+
+IF COL_LENGTH(
+    'dbo.Ugovori',
+    'IzabraneDodatneUsluge'
+) IS NULL
+BEGIN
+    ALTER TABLE dbo.Ugovori
+    ADD IzabraneDodatneUsluge NVARCHAR(100) NULL;
+END;
+GO
+
+SELECT
+    p.name AS Parametar
+FROM sys.parameters p
+WHERE p.object_id =
+    OBJECT_ID('dbo.spDodajUgovorSaStavkama')
+ORDER BY p.parameter_id;

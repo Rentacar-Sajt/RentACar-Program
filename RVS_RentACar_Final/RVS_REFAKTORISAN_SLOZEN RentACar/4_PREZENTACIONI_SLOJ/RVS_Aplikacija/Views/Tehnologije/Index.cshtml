@@ -1,0 +1,85 @@
+@model List<BibliotekaKlasa.KlasePodatakaEF.ModeliEF.TehnologijaEntityModel>
+
+@{
+    ViewData["Title"] = "Технологије";
+}
+
+<h2>Tehnologije</h2>
+
+@if (TempData["Poruka"] != null)
+{
+    var tip = TempData["PorukaTip"]?.ToString() ?? "uspeh"; // default uspeh
+    var cssClass = tip switch
+    {
+        "uspeh" => "alert-success",
+        "greska" => "alert-danger",
+        _ => "alert-info"
+    };
+
+    <div class="alert @cssClass">
+        @TempData["Poruka"]
+    </div>
+}
+
+@* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form method="get" asp-action="Index" class="mb-3 d-flex flex-wrap gap-2">
+    <div class="input-group" style="max-width: 300px;">
+        <input type="text" name="filter" class="form-control" placeholder="Pretraži tehnologije..."
+               value="@(ViewData["Filter"] ?? "")" />
+        <button type="submit" class="btn btn-secondary">Pretraži</button>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-primary">Prikaži sve</a>
+</form>
+
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a class="btn btn-primary" asp-action="Dodaj">Dodaj novu tehnologiju</a>
+    </p>
+}
+
+<div class="table-responsive">
+    @* Tabela prikazuje kolekciju podataka koju je kontroler pripremio u ViewModel-u. *@
+<table class="table table-bordered table-striped table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Naziv tehnologije</th>
+                @if (User.IsInRole("Admin"))
+                {
+                    <th>Akcije</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="@(User.IsInRole("Admin") ? 3 : 2)" class="text-center">Nema tehnologija za prikaz.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@t.Id</td>
+                        <td>@t.NazivTehnologije</td>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <td class="d-flex flex-wrap gap-1">
+                                <a class="btn btn-sm btn-warning" asp-action="Izmeni" asp-route-id="@t.Id">
+                                    Izmeni
+                                </a>
+                                <form asp-action="Obrisi" asp-route-id="@t.Id" method="post"
+                                      onsubmit="return confirm('Da li ste sigurni da želite da obrišete ovu tehnologiju?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Obriši</button>
+                                </form>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,26 @@
+@model RVS_Aplikacija.ViewModels.TehnologijaViewModel
+
+@{
+    ViewData["Title"] = "Додај технологију";
+}
+
+<h2>Dodaj novu tehnologiju</h2>
+
+@* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-action="Dodaj" method="post">
+    <div class="mb-3">
+        <label asp-for="NazivTehnologije" class="form-label"></label>
+        <input asp-for="NazivTehnologije" class="form-control" />
+        <span asp-validation-for="NazivTehnologije" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Dodaj</button>
+    <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+</form>
+
+@* Scripts sekcija se renderuje na dnu layout-a; ovde su validacija i dinamičko ponašanje forme. *@
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,99 @@
+@model RVS_Aplikacija.ViewModels.UgovorViewModel
+
+@{
+    ViewData["Title"] = "Brisanje ugovora";
+}
+
+<h2>Brisanje ugovora</h2>
+
+<hr />
+
+@if (TempData["Greska"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Greska"]
+    </div>
+}
+
+<div class="alert alert-danger">
+    <strong>Pažnja!</strong>
+    Da li ste sigurni da želite da obrišete ovaj ugovor?
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <strong>Ugovor @Model.BrojUgovora</strong>
+    </div>
+
+    <div class="card-body">
+
+        <dl class="row">
+            <dt class="col-sm-4">
+                Broj ugovora
+            </dt>
+
+            <dd class="col-sm-8">
+                @Model.BrojUgovora
+            </dd>
+
+            <dt class="col-sm-4">
+                Datum izdavanja
+            </dt>
+
+            <dd class="col-sm-8">
+                @Model.DatumIzdavanja.ToString("dd.MM.yyyy.")
+            </dd>
+
+            <dt class="col-sm-4">
+                Klijent
+            </dt>
+
+            <dd class="col-sm-8">
+                @if (Model.KlijentObjekat != null)
+                {
+                    @($"{Model.KlijentObjekat.Ime} {Model.KlijentObjekat.Prezime}")
+                }
+                else
+                {
+                    @($"ID: {Model.KlijentId}")
+                }
+            </dd>
+
+            <dt class="col-sm-4">
+                Status ugovora
+            </dt>
+
+            <dd class="col-sm-8">
+                @Model.StatusUgovora
+            </dd>
+
+            <dt class="col-sm-4">
+                Ukupno za plaćanje
+            </dt>
+
+            <dd class="col-sm-8">
+                @Model.UkupnoZaPlacanje.ToString("N2")
+            </dd>
+        </dl>
+
+        @* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-action="ObrisiPotvrda"
+              asp-route-id="@Model.Id"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Obriši ugovor
+            </button>
+
+            <a asp-action="Detalji"
+               asp-route-id="@Model.Id"
+               class="btn btn-secondary">
+                Odustani
+            </a>
+        </form>
+
+    </div>
+</div>

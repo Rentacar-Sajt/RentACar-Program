@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "(АПИ) Измени технологију";
+}
+
+<h2>Измени технологију</h2>
+
+@* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form id="formaIzmeni">
+    <input type="hidden" id="tehnologijaId" value="@ViewData["Id"]" />
+
+    <div class="mb-3">
+        <label for="nazivTehnologije" class="form-label">Naziv tehnologije</label>
+        <input type="text" id="nazivTehnologije" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-warning">Sačuvaj izmene</button>
+    <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+</form>
+
+<!-- Div za poruke -->
+<div id="divPoruka"></div>
+
+@* Scripts sekcija se renderuje na dnu layout-a; ovde su validacija i dinamičko ponašanje forme. *@
+@section Scripts {
+    <script src="~/js/APITehnologije/APITehnologijaIzmeni.js"></script>
+}

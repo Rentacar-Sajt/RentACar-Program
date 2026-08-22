@@ -1,0 +1,64 @@
+@model BibliotekaKlasa.KlasePodataka.Modeli.KursModel
+
+@{
+    ViewData["Title"] = "Детаљи курса";
+}
+
+<h2>Детаљи курса</h2>
+
+<!-- Kurs info -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">@Model.NazivKursa</h4>
+
+        <p class="card-text">
+            <strong>Опис:</strong> @Model.OpisKursa
+        </p>
+
+        <p class="card-text">
+            <strong>Аутор:</strong> @Model.KorisnikObjekat?.Email
+        </p>
+
+        <p class="card-text">
+            <strong>ID курса:</strong> @Model.Id
+        </p>
+    </div>
+</div>
+
+<!-- Casovi tabela -->
+<h4>Часови</h4>
+
+<div class="table-responsive">
+    @* Tabela prikazuje kolekciju podataka koju je kontroler pripremio u ViewModel-u. *@
+<table class="table table-bordered table-striped table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ИД</th>
+                <th>Редни број часа</th>
+                <th>Назив технологије</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model.Casovi == null || Model.Casovi.Count == 0)
+            {
+                <tr>
+                    <td colspan="3" class="text-center">
+                        Нема часова за овај курс.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var casModelObjekat in Model.Casovi)
+                {
+                    <tr>
+                        <td>@casModelObjekat.Id</td>
+                        <td>@casModelObjekat.RedniBrojCasa</td>
+                        <td>@casModelObjekat.TehnologijaObjekat.NazivTehnologije</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,245 @@
+@model RVS_Aplikacija.ViewModels.PromenaStatusaUgovoraViewModel
+
+@{
+    ViewData["Title"] = "Promena statusa ugovora";
+}
+
+<h2>Promena statusa ugovora</h2>
+
+<hr />
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <strong>Ugovor @Model.BrojUgovora</strong>
+            </div>
+
+            <div class="card-body">
+                @* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form asp-action="PromeniStatus"
+                      asp-route-id="@Model.Id"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="DatumVracanja" type="hidden" />
+
+                    <div asp-validation-summary="All"
+                         class="text-danger mb-3">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="BrojUgovora"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="BrojUgovora"
+                                   class="form-control"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TrenutniStatus"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="TrenutniStatus"
+                                   class="form-control"
+                                   readonly />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NoviStatus"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="NoviStatus"
+                                asp-items="Model.StatusiOpcije"
+                                class="form-select">
+                            <option value="">
+                                -- Izaberite novi status --
+                            </option>
+                        </select>
+
+                        <span asp-validation-for="NoviStatus"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div id="podaci-vracanja"
+                         class="border rounded p-3 mb-3 d-none">
+
+                        <h5>Vraćanje vozila</h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Ugovoreni datum vraćanja
+                                </label>
+
+                                <input value="@Model.DatumVracanja.ToString("dd.MM.yyyy. HH:mm")"
+                                       class="form-control"
+                                       readonly />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="StvarniDatumVracanja"
+                                       class="form-label">
+                                </label>
+
+                                <input asp-for="StvarniDatumVracanja"
+                                       type="datetime-local"
+                                       class="form-control" />
+
+                                <span asp-validation-for="StvarniDatumVracanja"
+                                      class="text-danger">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-text mb-3">
+                            Tolerancija za kašnjenje je 6 sati. Posle toga
+                            se naplaćuje 2.000 RSD za svaki započeti dan kašnjenja.
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Naplaćeni dani kašnjenja:</span>
+                                <strong id="broj-dana-kasnjenja">
+                                    @Model.BrojDanaKasnjenja
+                                </strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Kazna za kašnjenje:</span>
+                                <strong>
+                                    <span id="kazna-prikaz">
+                                        @Model.KaznaZaKasnjenje.ToString("N2")
+                                    </span>
+                                    RSD
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Sačuvaj status
+                    </button>
+
+                    <a asp-action="Detalji"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-secondary">
+                        Odustani
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Scripts sekcija se renderuje na dnu layout-a; ovde su validacija i dinamičko ponašanje forme. *@
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                const status =
+                    document.getElementById("NoviStatus");
+
+                const stvarniDatum =
+                    document.getElementById("StvarniDatumVracanja");
+
+                const podaciVracanja =
+                    document.getElementById("podaci-vracanja");
+
+                const ugovoreniDatum =
+                    new Date(
+                        "@Model.DatumVracanja.ToString("yyyy-MM-ddTHH:mm:ss")"
+                    );
+
+                const tolerancijaUSatima = 6;
+                const kaznaPoDanu = 2000;
+
+                function formatirajNovac(iznos) {
+                    return Number(iznos || 0)
+                        .toLocaleString(
+                            "sr-RS",
+                            {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }
+                        );
+                }
+
+                function izracunajKaznu() {
+                    const zavrsen =
+                        status && status.value === "Završen";
+
+                    if (podaciVracanja) {
+                        podaciVracanja.classList.toggle(
+                            "d-none",
+                            !zavrsen
+                        );
+                    }
+
+                    let brojDana = 0;
+                    let kazna = 0;
+
+                    if (zavrsen &&
+                        stvarniDatum &&
+                        stvarniDatum.value) {
+
+                        const stvarnoVracanje =
+                            new Date(stvarniDatum.value);
+
+                        const kasnjenjeSati =
+                            (stvarnoVracanje - ugovoreniDatum) /
+                            (1000 * 60 * 60);
+
+                        if (kasnjenjeSati > tolerancijaUSatima) {
+                            brojDana = Math.max(
+                                1,
+                                Math.ceil(kasnjenjeSati / 24)
+                            );
+
+                            kazna =
+                                brojDana * kaznaPoDanu;
+                        }
+                    }
+
+                    document.getElementById(
+                        "broj-dana-kasnjenja"
+                    ).textContent = brojDana.toString();
+
+                    document.getElementById(
+                        "kazna-prikaz"
+                    ).textContent = formatirajNovac(kazna);
+                }
+
+                if (status) {
+                    status.addEventListener(
+                        "change",
+                        izracunajKaznu
+                    );
+                }
+
+                if (stvarniDatum) {
+                    stvarniDatum.addEventListener(
+                        "input",
+                        izracunajKaznu
+                    );
+                }
+
+                izracunajKaznu();
+            }
+        );
+    </script>
+}

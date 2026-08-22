@@ -1,0 +1,24 @@
+@model RVS_Aplikacija.ViewModels.VoziloViewModel
+@{ ViewData["Title"] = "Detalji vozila"; }
+<h1>Detalji vozila</h1><hr />
+<div class="card"><div class="card-body"><div class="row g-4">
+    <div class="col-lg-5 text-center">
+        @if (!string.IsNullOrWhiteSpace(Model.SlikaPutanja))
+        { <img src="@Model.SlikaPutanja" alt="@Model.Marka @Model.Model" class="img-fluid rounded border" style="max-height: 360px; width: 100%; object-fit: cover;" /> }
+        else
+        { <div class="border rounded p-5 text-muted">Vozilo nema fotografiju.</div> }
+    </div>
+    <div class="col-lg-7"><h3>@Model.Marka @Model.Model</h3><dl class="row mb-0">
+        <dt class="col-sm-5">Registracija</dt><dd class="col-sm-7">@Model.Registracija</dd>
+        <dt class="col-sm-5">Godište</dt><dd class="col-sm-7">@(Model.Godiste?.ToString() ?? "-")</dd>
+        <dt class="col-sm-5">Gorivo</dt><dd class="col-sm-7">@(Model.Gorivo ?? "-")</dd>
+        <dt class="col-sm-5">Menjač</dt><dd class="col-sm-7">@(Model.Menjac ?? "-")</dd>
+        <dt class="col-sm-5">Kilometraža</dt><dd class="col-sm-7">@(Model.Kilometraza.HasValue ? Model.Kilometraza.Value.ToString("N0") + " km" : "-")</dd>
+        <dt class="col-sm-5">Boja</dt><dd class="col-sm-7">@(Model.Boja ?? "-")</dd>
+        <dt class="col-sm-5">Broj sedišta</dt><dd class="col-sm-7">@(Model.BrojSedista?.ToString() ?? "-")</dd>
+        <dt class="col-sm-5">Zapremina motora</dt><dd class="col-sm-7">@(Model.ZapreminaMotora.HasValue ? Model.ZapreminaMotora.Value.ToString("N1") + " l" : "-")</dd>
+        <dt class="col-sm-5">Snaga motora</dt><dd class="col-sm-7">@(Model.SnagaMotora.HasValue ? Model.SnagaMotora.Value + " kW" : "-")</dd>
+        <dt class="col-sm-5">Cena po danu</dt><dd class="col-sm-7 fw-bold">@Model.CenaPoDanu.ToString("N2") RSD</dd>
+        <dt class="col-sm-5">Status</dt><dd class="col-sm-7">@Model.StatusVozila</dd>
+    </dl></div>
+</div><hr /><a asp-action="Izmeni" asp-route-id="@Model.Id" class="btn btn-warning">Izmeni</a> <a asp-action="Index" class="btn btn-secondary">Nazad</a></div></div>

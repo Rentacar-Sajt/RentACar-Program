@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "(АПИ) Технологије";
+}
+
+<h2>Технологије</h2>
+
+<!-- Ово је блок за приказ порука од стране Јаваскрипт-а -->
+<div id="poruka"></div> 
+
+@* Forma grupiše polja koja se šalju kontroleru kada korisnik potvrdi unos. *@
+<form id="filterForma" class="mb-3 d-flex flex-wrap gap-2">
+    <div class="input-group" style="max-width: 300px;">
+        <input type="text" id="filterInput" class="form-control" placeholder="Pretraži tehnologije..." />
+        <button type="submit" class="btn btn-secondary">Pretraži</button>
+    </div>
+    <button type="button" id="prikaziSve" class="btn btn-outline-primary">Prikaži sve</button>
+</form>
+
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a class="btn btn-primary" href="@Url.Action("Dodaj", "TehnologijeAPI")">Dodaj novu tehnologiju</a>
+    </p>
+}
+
+<div class="table-responsive">
+    @* Tabela prikazuje kolekciju podataka koju je kontroler pripremio u ViewModel-u. *@
+<table class="table table-bordered table-striped table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Naziv tehnologije</th>
+                @if (User.IsInRole("Admin"))
+                {
+                    <th>Akcije</th>
+                }
+            </tr>
+        </thead>
+        <tbody id="tabelaTehnologija">
+            <tr>
+                <td colspan="@(User.IsInRole("Admin") ? 3 : 2)" class="text-center">Učitavanje...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="~/js/APITehnologije/APITehnologijaPrikaz.js"></script>

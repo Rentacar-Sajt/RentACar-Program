@@ -1,0 +1,376 @@
+@model RVS_Aplikacija.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Kontrolna tabla";
+}
+
+<style>
+    .dashboard-hero {
+        background: linear-gradient(135deg, #17324d, #245b85);
+        color: #fff;
+        border-radius: 18px;
+        padding: 24px;
+    }
+
+    .stat-card {
+        border: 0;
+        border-radius: 16px;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .10) !important;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: .9rem;
+        margin-bottom: .35rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        line-height: 1;
+        font-weight: 700;
+    }
+
+    .dashboard-section {
+        border: 0;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .dashboard-table th {
+        white-space: nowrap;
+        font-size: .85rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: .35rem .65rem;
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 600;
+    }
+
+    .dashboard-page {
+        border-radius: 18px;
+        background-color: var(--app-background);
+        color: var(--app-text);
+        transition: background-color .25s ease, color .25s ease;
+    }
+
+    html.dark-mode .dashboard-hero {
+        background: linear-gradient(135deg, #111c2b, #173a58);
+    }
+
+    html.dark-mode .dashboard-page .stat-label,
+    html.dark-mode .dashboard-page .dashboard-table th {
+        color: var(--app-muted) !important;
+    }
+
+    html.dark-mode .dashboard-page .table-warning {
+        --bs-table-bg: #4b3b16;
+        --bs-table-color: #fff3cd;
+        --bs-table-hover-bg: #5c491b;
+        --bs-table-hover-color: #ffffff;
+    }
+
+    html.dark-mode .dashboard-page .alert-danger {
+        color: #ffd7dc;
+        background-color: #3a1d24;
+        border-color: #6e2c38;
+    }
+
+    html.dark-mode .dashboard-page .alert-warning {
+        color: #fff0bd;
+        background-color: #3b3218;
+        border-color: #6b5a21;
+    }
+
+</style>
+
+<div id="dashboardPage" class="dashboard-page container-fluid px-2 px-lg-4 py-3">
+    <div class="dashboard-hero shadow-sm mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+        <div>
+            <h1 class="fw-bold mb-1">Kontrolna tabla</h1>
+            <p class="mb-0 opacity-75">Pregled trenutnog stanja Rent a Car sistema.</p>
+        </div>
+
+            <div class="text-lg-end">
+                <div class="small opacity-75">Podaci osveženi</div>
+                <div class="fw-semibold">@Model.GenerisanoU.ToString("dd.MM.yyyy. HH:mm")</div>
+            </div>
+    </div>
+
+    @if (ViewBag.Greska != null)
+    {
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <strong>Greška:</strong> @ViewBag.Greska
+        </div>
+    }
+
+    @if (Model.ZakasnelaVracanja > 0)
+    {
+        <div class="alert alert-warning shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2" role="alert">
+            <div>
+                <strong>Pažnja:</strong> @Model.ZakasnelaVracanja aktivnih ugovora ima prekoračeno vreme vraćanja.
+            </div>
+            <a asp-controller="Ugovori" asp-action="Index" class="btn btn-sm btn-warning">Pregled ugovora</a>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Ukupno vozila</div>
+                    <div class="stat-value">@Model.BrojVozila</div>
+                    <div class="small text-muted mt-2">Cela flota</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a asp-controller="Vozila" asp-action="Index" class="btn btn-sm btn-outline-primary w-100">Pregled vozila</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Slobodna vozila</div>
+                    <div class="stat-value text-success">@Model.SlobodnaVozila</div>
+                    <div class="small text-muted mt-2">Spremna za izdavanje</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a asp-controller="Vozila" asp-action="Index" asp-route-status="Slobodno" class="btn btn-sm btn-outline-success w-100">Prikaži slobodna</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Zauzeta vozila</div>
+                    <div class="stat-value text-danger">@Model.ZauzetaVozila</div>
+                    <div class="small text-muted mt-2">Trenutno iznajmljena</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a asp-controller="Vozila" asp-action="Index" asp-route-status="Zauzeto" class="btn btn-sm btn-outline-danger w-100">Prikaži zauzeta</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Vozila na servisu</div>
+                    <div class="stat-value text-warning">@Model.VozilaNaServisu</div>
+                    <div class="small text-muted mt-2">Privremeno nedostupna</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a asp-controller="Vozila" asp-action="Index" asp-route-status="Servis" class="btn btn-sm btn-outline-warning w-100">Prikaži servis</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Ukupno klijenata</div>
+                    <div class="stat-value">@Model.BrojKlijenata</div>
+                    <div class="small text-muted mt-2">Registrovani klijenti</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a asp-controller="Klijenti" asp-action="Index" class="btn btn-sm btn-outline-primary w-100">Pregled klijenata</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Aktivni ugovori</div>
+                    <div class="stat-value text-primary">@Model.AktivniUgovori</div>
+                    <div class="small text-muted mt-2">Ugovori u toku</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a asp-controller="Ugovori" asp-action="Index" class="btn btn-sm btn-outline-primary w-100">Pregled ugovora</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Preuzimanja danas</div>
+                    <div class="stat-value text-info">@Model.PreuzimanjaDanas</div>
+                    <div class="small text-muted mt-2">Zakazana preuzimanja</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label">Vraćanja danas</div>
+                    <div class="stat-value text-warning">@Model.VracanjaDanas</div>
+                    <div class="small text-muted mt-2">Zakazana vraćanja</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card stat-card shadow-sm h-100 border-start border-4 border-danger">
+                <div class="card-body">
+                    <div class="stat-label">Zakasnela vraćanja</div>
+                    <div class="stat-value text-danger">@Model.ZakasnelaVracanja</div>
+                    <div class="small text-muted mt-2">Aktivni ugovori kojima je istekao rok</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card stat-card shadow-sm h-100 border-start border-4 border-success">
+                <div class="card-body">
+                    <div class="stat-label">Prihod ovog meseca</div>
+                    <div class="h3 fw-bold text-success mb-1">@Model.PrihodOvogMeseca.ToString("N2") RSD</div>
+                    <div class="small text-muted">Ne uključuje otkazane ugovore</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="stat-label mb-2">Brze akcije</div>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Ugovori" asp-action="Dodaj" class="btn btn-warning">Dodaj ugovor</a>
+                        <div class="row g-2">
+                            <div class="col-6"><a asp-controller="Vozila" asp-action="Dodaj" class="btn btn-outline-primary w-100">Dodaj vozilo</a></div>
+                            <div class="col-6"><a asp-controller="Klijenti" asp-action="Dodaj" class="btn btn-outline-success w-100">Dodaj klijenta</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card dashboard-section shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h4 class="fw-bold mb-1">Preuzimanja danas</h4>
+                    <p class="text-muted small mb-0">Vozila koja klijenti treba da preuzmu danas.</p>
+                </div>
+                <div class="card-body px-0">
+                    <div class="table-responsive">
+                        @* Tabela prikazuje kolekciju podataka koju je kontroler pripremio u ViewModel-u. *@
+<table class="table table-hover align-middle dashboard-table mb-0">
+                            <thead><tr><th class="ps-4">Ugovor</th><th>Klijent</th><th>Vreme</th><th class="text-end pe-4">Akcija</th></tr></thead>
+                            <tbody>
+                            @if (Model.DanasnjaPreuzimanja.Any())
+                            {
+                                foreach (var stavka in Model.DanasnjaPreuzimanja)
+                                {
+                                    <tr>
+                                        <td class="ps-4 fw-semibold">@stavka.BrojUgovora</td>
+                                        <td>@stavka.Klijent<div class="small text-muted">@stavka.Vozilo</div></td>
+                                        <td>@stavka.DatumPreuzimanja.ToString("HH:mm")</td>
+                                        <td class="text-end pe-4"><a asp-controller="Ugovori" asp-action="Detalji" asp-route-id="@stavka.Id" class="btn btn-sm btn-outline-primary">Detalji</a></td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="4" class="text-center text-muted py-4">Danas nema zakazanih preuzimanja.</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="card dashboard-section shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h4 class="fw-bold mb-1">Vraćanja danas</h4>
+                    <p class="text-muted small mb-0">Vozila koja klijenti treba da vrate danas.</p>
+                </div>
+                <div class="card-body px-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle dashboard-table mb-0">
+                            <thead><tr><th class="ps-4">Ugovor</th><th>Klijent</th><th>Vreme</th><th class="text-end pe-4">Akcija</th></tr></thead>
+                            <tbody>
+                            @if (Model.DanasnjaVracanja.Any())
+                            {
+                                foreach (var stavka in Model.DanasnjaVracanja)
+                                {
+                                    <tr class="@(stavka.Kasni ? "table-warning" : "")">
+                                        <td class="ps-4 fw-semibold">@stavka.BrojUgovora</td>
+                                        <td>@stavka.Klijent<div class="small text-muted">@stavka.Vozilo</div></td>
+                                        <td>@stavka.DatumVracanja.ToString("HH:mm") @if (stavka.Kasni) { <span class="badge bg-danger ms-1">Kasni</span> }</td>
+                                        <td class="text-end pe-4"><a asp-controller="Ugovori" asp-action="Detalji" asp-route-id="@stavka.Id" class="btn btn-sm btn-outline-primary">Detalji</a></td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="4" class="text-center text-muted py-4">Danas nema zakazanih vraćanja.</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card dashboard-section shadow-sm">
+        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h4 class="fw-bold mb-1">Poslednji ugovori</h4>
+                <p class="text-muted small mb-0">Pet poslednje izdatih ugovora.</p>
+            </div>
+            <a asp-controller="Ugovori" asp-action="Index" class="btn btn-outline-primary btn-sm">Svi ugovori</a>
+        </div>
+        <div class="card-body px-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle dashboard-table mb-0">
+                    <thead><tr><th class="ps-4">Broj</th><th>Klijent</th><th>Period</th><th>Status</th><th class="text-end">Ukupno</th><th class="text-end pe-4">Akcija</th></tr></thead>
+                    <tbody>
+                    @if (Model.PoslednjiUgovori.Any())
+                    {
+                        foreach (var stavka in Model.PoslednjiUgovori)
+                        {
+                            string badgeKlasa = stavka.StatusUgovora?.ToLowerInvariant() switch
+                            {
+                                "aktivan" => "bg-primary text-white",
+                                "završen" => "bg-success text-white",
+                                "otkazan" => "bg-danger text-white",
+                                _ => "bg-secondary text-white"
+                            };
+
+                            <tr>
+                                <td class="ps-4 fw-semibold">@stavka.BrojUgovora</td>
+                                <td>@stavka.Klijent<div class="small text-muted">@stavka.Vozilo</div></td>
+                                <td>@stavka.DatumPreuzimanja.ToString("dd.MM.") – @stavka.DatumVracanja.ToString("dd.MM.yyyy.")</td>
+                                <td><span class="status-badge @badgeKlasa">@stavka.StatusUgovora</span></td>
+                                <td class="text-end fw-semibold">@stavka.UkupnoZaPlacanje.ToString("N2") RSD</td>
+                                <td class="text-end pe-4"><a asp-controller="Ugovori" asp-action="Detalji" asp-route-id="@stavka.Id" class="btn btn-sm btn-outline-primary">Detalji</a></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">Nema evidentiranih ugovora.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
