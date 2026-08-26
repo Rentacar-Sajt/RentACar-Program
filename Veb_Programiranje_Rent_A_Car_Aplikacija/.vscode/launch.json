@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Test SQL Server konekcije",
+            "request": "launch",
+            "mainClass": "Kontroler.TestDatabaseConnection",
+            "vmArgs": "-Djava.library.path=${workspaceFolder}\\Rent_a_Car_Aplikacija\\lib\\auth\\x64"
+        },
+        {
+            "type": "java",
+            "name": "Pokreni Rent-a-Car aplikaciju",
+            "request": "launch",
+            "mainClass": "Kontroler.Login_Prijava",
+            "vmArgs": "-Djava.library.path=${workspaceFolder}\\Rent_a_Car_Aplikacija\\lib\\auth\\x64"
+        }
+    ]
+}

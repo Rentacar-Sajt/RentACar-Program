@@ -1,0 +1,9 @@
+{
+    "java.project.referencedLibraries": [
+        "Rent_a_Car_Aplikacija/lib/**/*.jar"
+    ],
+    "java.project.sourcePaths": [
+        "Rent_a_Car_Aplikacija/src"
+    ],
+    "java.project.outputPath": "bin"
+}
