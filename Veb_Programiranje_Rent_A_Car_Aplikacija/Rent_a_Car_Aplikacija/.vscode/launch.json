@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "1 - Test SQL Server konekcije",
+            "request": "launch",
+            "mainClass": "Kontroler.TestDatabaseConnection",
+            "classPaths": [
+                "${workspaceFolder}/bin",
+                "${workspaceFolder}/lib/*"
+            ],
+            "vmArgs": "--enable-native-access=ALL-UNNAMED -Djava.library.path=\"${workspaceFolder}\\lib\\auth\\x64\""
+        },
+        {
+            "type": "java",
+            "name": "2 - Pokreni Rent-a-Car aplikaciju",
+            "request": "launch",
+            "mainClass": "Kontroler.Login_Prijava",
+            "classPaths": [
+                "${workspaceFolder}/bin",
+                "${workspaceFolder}/lib/*"
+            ],
+            "vmArgs": "--enable-native-access=ALL-UNNAMED -Djava.library.path=\"${workspaceFolder}\\lib\\auth\\x64\""
+        }
+    ]
+}
